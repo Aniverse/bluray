@@ -1,7 +1,10 @@
 #!/bin/bash
+# 
+# Author: Aniverse
+# https://github.com/Aniverse/bdupload
 # --------------------------------------------------------------------------------
-BDUploadDATE=20180202
-BDUploadVER=101
+BDUploadDATE=20180209
+BDUploadVER=102
 # --------------------------------------------------------------------------------
 black=$(tput setaf 0); red=$(tput setaf 1); green=$(tput setaf 2); yellow=$(tput setaf 3);
 blue=$(tput setaf 4); magenta=$(tput setaf 5); cyan=$(tput setaf 6); white=$(tput setaf 7);
@@ -11,9 +14,7 @@ dim=$(tput dim); underline=$(tput smul); reset_underline=$(tput rmul); standout=
 reset_standout=$(tput rmso); normal=$(tput sgr0); alert=${white}${on_red}; title=${standout};
 baihuangse=${white}${on_yellow}; bailanse=${white}${on_blue}; bailvse=${white}${on_green};
 baiqingse=${white}${on_cyan}; baihongse=${white}${on_red}; baizise=${white}${on_magenta};
-heibaise=${black}${on_white};
-shanshuo=$(tput blink); wuguangbiao=$(tput civis); guangbiao=$(tput cnorm)
-# --------------------------------------------------------------------------------
+heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis); guangbiao=$(tput cnorm)
 # --------------------------------------------------------------------------------
 
 # Logo
@@ -66,32 +67,51 @@ _check_install_2
 
 if [[ $appmissing == "Yes" ]]; then
 
-    echo -e "01) ${cyan}Install them to system with root privilege${white}"
-    echo -e "02) ${cyan}Use bdupload script built-in library${white}"
-    echo -e "03) ${cyan}Exit${white}"
+    echo -e "\n01) ${cyan}Install them to system with root privilege${white}"
+    echo "02) ${cyan}Use bdupload script built-in library${white}"
+    echo "03) ${cyan}Exit${white}"
 
-    echo; echo -e "Oooops, ${baihongse}${tmpmissingapp%?}${normal} is missing, without them the script can't work,"; echo
-    echo -ne "${yellow}What would you like to do? (Default 02)"; read responce
+    echo -e "Oooops, ${baihongse}${tmpmissingapp%?}${normal} is missing, without them the script can't work,"
 
-    case $responce in
-        01 | 1)      # 使用 root 权限安装所需软件到系统目录
-                     apt-get install -y mono-complete mktorrent imagemagick
-                     [[ "${ffmpeg_installed}" == "No" ]] && _install_ffmpeg
-                     [[ "${vcs_installed}" == "No" ]] && _install_vcs
-                     _install_bdinfo
-                     _logo
-                     ;;
-        02 | 2 | "") # 无需 root，使用脚本内置库来运行
-                     export PATH=XXXXXXXXXXXXXXXXXXXXXXXXXXXX
-                     ;;
-        03 | 3)      # 退出脚本
-                     echo "${bold}Exiting script ...${normal}"
-                     exit 0
-                     ;;
-        *)           # 默认选项
-                     export PATH=XXXXXXXXXXXXXXXXXXXXXXXXXXXX
-                     ;;
-    esac
+    installdone=0
+    while [[ $installdone = 0 ]]; do
+
+        installresponce=0
+        while [[ $installresponce = 0 ]]; do
+            installresponce=1
+            echo -n "${yellow}${bold}What would you like to do?${white} (Default 02) ${normal}" ; read -e responce ; echo
+        done
+
+        case $responce in
+            01 | 1)      # 使用 root 权限安装所需软件到系统目录
+                         if [[ $NoRoot == 1 ]]; then installresponce=0 && echo -e "${baihongse}${bold}ERROR${normal}${bold} You DONOT have ROOT privilege${normal}\n"
+                         else apt-get install -y mono-complete mktorrent imagemagick
+                         [[ ! $( command -v ffmpeg ) ]] && _install_ffmpeg
+                         [[ ! $( command -v vcs ) ]] && _install_vcs
+                         _install_bdinfo ; _logo ; installdone=1 ; fi
+                         ;;
+            02 | 2 | "") # 无需 root，使用脚本内置库运行
+                         echo "${bold}The script will use built-in library ...${normal}"
+#                        DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+#                        export PATH=$DIR:$DIR/tools:$PATH	# using $DIR before $PATH to override it.
+#                        export MONO_PATH=$DIR/mono.net-4.0
+#                        bdinfocli_path=$DIR/tools/bdinfocli.exe
+                         installdone=1
+                         ;;
+            03 | 3)      # 退出脚本
+                         echo "${bold}Exiting script ...${normal}"
+                         exit 0
+                         ;;
+            *)           # 重新输入
+                         installresponce=0
+                         ;;
+        esac
+
+    done
+
+else
+
+    echo -e "\n${bold}Good, All the needed softwares are installed ...${normal}"
 
 fi ; }
 
@@ -168,8 +188,13 @@ main_m2ts_path=$(echo "$tempvar" | head -n 1)
 duration1=$(ffmpeg -i "$main_m2ts_path"  /dev/null 2>&1 | egrep '(Duration:)' | cut -d ' ' -f4 | cut -c1-8)
 duration2=`date -u -d "1970-01-01 $duration1" +%s`
 
-mkdir -p "/etc/inexistence/04.Upload/$file_title_clean"
-outputpath="/etc/inexistence/04.Upload/$file_title_clean"
+if [[ $NoRoot == 1 ]]; then
+    mkdir -p "~/bdupload/0utput/$file_title_clean"
+    outputpath="~/bdupload/0utput/$file_title_clean"
+else
+    mkdir -p "/etc/inexistence/04.Upload/$file_title_clean"
+    outputpath="/etc/inexistence/04.Upload/$file_title_clean"
+fi
 
 echo ; }
 
@@ -291,22 +316,15 @@ elif [[ "${newtorrent}" == "No" ]]; then
     echo -e "The script will not create a new torrent"
 fi
 
-echo
-
-}
+echo ; }
 
 
 # 准备
 function _preparation() {
-
 echo "${bold}If you want to stop, Press ${on_red}Ctrl+C${normal} ${bold}; or Press ${on_green}ENTER${normal} ${bold}to start${normal}" ;read input
-
 clear
 starttime=$(date +%s)
-echo -e "Work start!"
-echo
-
-}
+echo -e "\nWork start!" ; }
 
 
 # 获取BD info
