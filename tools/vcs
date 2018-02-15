@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
-# $Rev: 675 $ $Date: 2017-05-25 19:16:19 +0200 (Thu, 25 May 2017) $
+# $Rev: 583 $ $Date: 2014-05-18 18:50:42 +0200 (dg, 18 mai 2014) $
 #
 # vcs
 # Video Contact Sheet *NIX: Generates contact sheets (previews) of videos
 #
-# Copyright (C) 2007-2017 Toni Corvera
+# Copyright (C) 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014 Toni Corvera
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -28,9 +28,10 @@
 #
 # The full changelog can be found at <http://p.outlyer.net/vcs/files/CHANGELOG>
 
-declare -r VERSION="1.13.3"
+
+declare -r VERSION="1.13.2"
 declare -r RELEASE=1
-declare -ri PRERELEASE=2
+declare -ri PRERELEASE=3
 [ "$RELEASE" -eq 1 ] || declare -r SUBVERSION="-pre.${PRERELEASE}"
 
 set -e
@@ -1446,19 +1447,18 @@ get_pretty_size() {
 	local bytes=$1
 	local size=
 
-	# Sizes are always rounded up (hence the addition 0.999999 to the fractionary part)
 	if [[ $bytes -gt $(( 1024**3 )) ]]; then
-		local gibs_int=$(( $bytes / 1024**3 ))
-		local gibs_frac=$(awkex "int($bytes%(1024**3)*100/1024**3 + 0.999999)" )
-		size="$(printf '%d.%02d' $gibs_int $gibs_frac) GiB"
+		local gibs=$(( $bytes / 1024**3 ))
+		local mibs=$(( ( $bytes % 1024**3 ) / 1024**2 ))
+		size="${gibs}.${mibs:0:2} GiB"
 	elif [[ $bytes -gt $(( 1024**2)) ]]; then
-		local mibs_int=$(( $bytes / 1024**2 ))
-		local mibs_frac=$(awkex "int($bytes%(1024**2)*100/1024**2 + 0.999999)")
-		size="$(printf '%d.%02d' $mibs_int $mibs_frac) MiB"
+		local mibs=$(( $bytes / 1024**2 ))
+		local kibs=$(( ( $bytes % 1024**2 ) / 1024 ))
+		size="${mibs}.${kibs:0:2} MiB"
 	elif [[ $bytes -gt 1024 ]]; then
-		local kibs_int=$(( $bytes / 1024 ))
-		local kibs_frac=$(awkex "int($bytes%1024*100/1024 + 0.999999)")
-		size="$(printf '%d.%02d' $kibs_int $kibs_frac) KiB"
+		local kibs=$(( $bytes / 1024 ))
+		bytes=$(( $bytes % 1024 ))
+		size="${kibs}.${bytes:0:2} KiB"
 	else
 		size="${bytes} B"
 	fi
@@ -1818,44 +1818,14 @@ init_feedback() {
 
 	# Is tput available?
 	if type -pf tput >/dev/null ; then
-		# First we must find the correct way to query color support.
-		# There's basically two variants of tput:
-		#   terminfo (Linux) and termcap (FreeBSD)
-		# These is an issue for portability:
-		# - On Linux 'tput colors' is used to query it
-		# - On FreeBSD 'tput Co' is used to query it
-		# - Linux's tput will fail if it's passed 'Co'
-		# - FreeBSD's tput will interpret 'colors' as 'co' and print the number of columns
-		local tputc="-1"
-		if tput Co >/dev/null 2>&1 ; then
-			tputc=$(tput Co) # termcap style
-		else
-			# Try to guess if it's parsing it as columns
-			# The method here is to check against some known terminals
-			# pilot: 39 columns mono, pc3: 80 columns, 8 colors
-			if [[ 8 = "$(tput -T pc3 colors)" ]]; then
-				# colors is interpreted literally
-				tputc=$(tput colors)
-			fi
-		fi
 		# Is it able to set colours?
-		# Linux's tput can be passed arguments to retrieve the correct escape sequences
-		# FreeBSD's tput can not
-		if tput bold && [[ "-1" != "$tputc" ]] && tput setaf 0 && tput sgr0; then
-			# Can configure completely through tput
+		if tput bold && tput setaf 0 && tput sgr0 ; then
 			PREFIX_ERR=$(tput bold; tput setaf 1)
 			PREFIX_WARN=$(tput bold; tput setaf 3)
 			PREFIX_INF=$(tput bold; tput setaf 2)
 			PREFIX_DBG=$(tput bold; tput setaf 4)
 			SUFFIX_FBACK=$(tput sgr0)
 			HAS_COLORS="yes"
-		elif [[ "-1" != "$tputc" ]]; then
-			# tput reports color support but it doesn't provide
-			# the escape codes directly, will use hardcoded escape codes instead
-			HAS_COLORS=
-		else
-			HAS_COLORS="no"
-			set_feedback_prefixes
 		fi >/dev/null
 	fi
 
@@ -1996,7 +1966,6 @@ mplayer_identify() {
 	fi
 
 	# Warn if a known pitfall is found
-	# NOTE: These messages are supressed if called from classic_identify
 	# See above for 1000 fps
 	[[ ${mi[$FPS]} == '1000.00' ]] && \
 		warn "Possible inaccuracy in FPS detection." && \
@@ -2544,11 +2513,7 @@ capture() {
 			fi
 		done
 	fi
-	RESULT=
-	capture_and_evade "$1" "$2" "$3" ${alternatives[*]} || {
-		# Failed capture
-		return $?
-	}
+	capture_and_evade "$1" "$2" "$3" ${alternatives[*]}
 	# Correct the timestamp in case it had to be adjusted
 	local nstamp=$(echo "$CAPTURES" | tail -2 | head -1 | cut -d':' -f1)
 	if fptest "int($stamp)" -ne "int($nstamp)" ; then
@@ -2570,7 +2535,7 @@ capture_and_evade() {
 		tscand=$1
 		shift
 		if ! capture_impl "$f" "$tscand" "$ofile" ; then
-			error "Failed to capture frame at $(pretty_stamp $stamp) (${stamp}s)."
+			error "Failed to capture frame at $(pretty_stamp $stamp) (${stamp}s)"
 			return $EX_SOFTWARE
 		fi
 		# **XXX: EXPERIMENTAL: Blank frame evasion, initial test implementation
@@ -2626,6 +2591,7 @@ capture_impl() {
 		if [[ $DVD_MODE -eq 1 ]]; then
 			capfn=${CAPTURER}_dvd_capture
 		fi
+
 		$capfn "$f" "$stamp" "$ofile" || {
 			return $EX_SOFTWARE
 		}
@@ -3094,9 +3060,6 @@ get_vcodec_name() {
 		mp4v|MP4V) vcodec="MPEG-4" ;;
 		# Synthetic, used for ffmpeg translations
 		vcs_divx) vcodec="DivX ;-)" ;;
-		# Allow both the synthetic (for older mplayer) and builtin (for newer mplayer) codec ids
-		vcs_hevc|HEVC) vcodec="HEVC" ;;
-		vcs_vp9|VP90) vcodec="VP9" ;; # VP9 was detected as rawyuy2 by older MPlayer
 		*) # If not recognized fall back to FourCC
 			vcodec="$vcid"
 			;;
@@ -3124,13 +3087,6 @@ translate_ffmpeg_vcodec_id() {
 		camtasia)   mpid="tscc" ;;
 		vp6|vp6a|vp6f) mpid="VP60" ;;
 		vp8) mpid="VP80" ;;
-		# HEVC and VP9 weren't supported by older versions MPlayer
-		#   Seen:
-		#    "hevc (Main) (HEVC / 0x43564548)" in MPEG2-TS
-		#    "hevc" in h.265 ES
-		# TODO: Enforce a minimum version of mplayer
-		hevc|hevc\ *) mpid="vcs_hevc" ;;
-		vp9)          mpid="vcs_vp9" ;;
 		# TODO List of codec id's I translate but haven't tested:
 		#+ svq3, rv40, theora, camtasia, vp6*
 		# MPlayer uses uppercase whereas FFmpeg uses lowercase
@@ -3354,17 +3310,9 @@ classic_identify() {
 	[[ ${fid[$CHANS]} ]] && VID[$CHANS]=${fid[$CHANS]}
 	[[ ${fid[$ASPECT]} ]] && VID[$ASPECT]=${fid[$ASPECT]}
 	# There's a huge inconsistency with some files, both mplayer vs ffmpeg
-	# and same application on different OSes
+	# same application on different OSes
 	local fflen=${fid[$LEN]} mplen=${MPLAYER_ID[$LEN]} # Shorthands
-	# If the decoder can't seek there's no point in continuing
-	if [[ ( ( $DECODER -eq $DEC_FFMPEG ) && ( -z $fflen ) ) ||
-		  ( ( $DECODER -eq $DEC_MPLAYER ) && ( -z $mplen ) ) ]];
-	then
-		warn "$CAPTURER didn't report a length, seeking won't be possible."
-		return $RET_NOLEN
-	fi
 	[[ -z $fflen ]] && fflen=0
-	[[ -z $mplen ]] && mplen=0
 	# If both report 0, there's no good value...
 	fptest "$fflen" -eq 0 && fptest "$mplen" -eq 0 && return $RET_NOLEN
 
@@ -3389,12 +3337,7 @@ classic_identify() {
 
 	# Ensure sanity of the most important values
 	is_float "${VID[$LEN]}" || return $RET_NOLEN
-	is_number "${VID[$W]}" && is_number "${VID[$H]}" || {
-		# Fall back to ffmpeg's dimensions
-		VID[$W]=${FFMPEG_ID[$W]}
-		VID[$H]=${FFMPEG_ID[$H]}
-		is_number "${VID[$W]}" && is_number "${VID[$H]}" || return $RET_NODIM
-	}
+	is_number "${VID[$W]}" && is_number "${VID[$H]}" || return $RET_NODIM
 	# Mplayer can identify video as 0x0
 	if [[ ${VID[$W]} -eq 0 ]]; then
 		VID[$W]=${FFMPEG_ID[$W]}
@@ -3408,12 +3351,6 @@ classic_identify() {
 	# FPS at least with two decimals
 	if [[ $(awkex "int(${VID[$FPS]})") ==  "${VID[$FPS]}" ]]; then
 		VID[$FPS]="${VID[$FPS]}.00"
-	fi
-	# MPlayer tends to identify as raw video if it doesn't support the codec
-	# fall back to FFmpeg in such case
-	if [[ ${MPLAYER_ID[$VCODEC]} = "0x00000000" ]]; then
-		VID[$VCODEC]=${FFMPEG_ID[$VCODEC]}
-		VID[$VCNAME]=${FFMPEG_ID[$VCNAME]}
 	fi
 
 	local mfps="${MPLAYER_ID[$FPS]}"
@@ -3446,7 +3383,9 @@ classic_identify() {
 				assert 'fptest "$QUIRKS_MAX_REWIND" -gt 0'
 				local offby=$(pretty_stamp $QUIRKS_MAX_REWIND)
 				warn "  Capturing won't work, video is at least $offby shorter than reported."
-				warn "   Does $CAPTURER support ${VID[$VCODEC]}?."
+				local dname='ffmpeg'
+				[[ $DECODER -eq $DEC_MPLAYER ]] && dname='mplayer'
+				warn "   Does $dname support ${VID[$VCODEC]}?."
 				warn "   Try re-running with$reqs$reqp."
 			fi
 			return 1
@@ -3469,20 +3408,16 @@ classic_identify() {
 # identify_video($1 = file)
 identify_video() {
 	${IDENTIFIER}_identify "$1"
-	local ret=$?
 	VID=( "${RESULT[@]}" )
-	return $ret
 }
 
 dump_idinfo() {
 	trace $@
 	[[ $MPLAYER_BIN ]] && echo "Mplayer: $MPLAYER_BIN"
 	[[ $FFMPEG_BIN  ]] && echo "FFmpeg:  $FFMPEG_BIN"
-	local mpplen=
-	[[ -z "${MPLAYER_ID[${LEN}]}" ]] || mpplen=$(pretty_stamp ${MPLAYER_ID[$LEN]})
 	[[ $MPLAYER_BIN ]] && cat <<-EODUMP
 	=========== Mplayer Identification ===========
-	Length: $mpplen
+	Length: $(pretty_stamp ${MPLAYER_ID[$LEN]})
 	Video
 	    Codec: ${MPLAYER_ID[$VCODEC]} (${MPLAYER_ID[$VCNAME]})
 	    Dimensions: ${MPLAYER_ID[$W]}x${MPLAYER_ID[$H]}
@@ -3518,11 +3453,9 @@ EODUMP
 		xar=$(keepdecimals "${VID[$ASPECT]}" 4)
 		[[ $xar ]] && xar=" ($xar)"
 	fi
-	local clen=
-	[[ -z ${VID[$LEN]} ]] || clen=$(pretty_stamp ${VID[$LEN]})
 	cat <<-EODUMP
 	=========== Combined Identification ===========
-	Length: $clen
+	Length: $(pretty_stamp ${VID[$LEN]})
 	Video
 	    Codec: ${VID[$VCODEC]} (${VID[$VCNAME]})
 	    Dimensions: ${VID[$W]}x${VID[$H]}
@@ -3883,15 +3816,7 @@ process() {
 		# identified by capture number, padded to 6 characters
 		tfile=$(new_temp_file "-cap-$(pad 6 $n).png")
 
-		capture "$f" "$tfile" $stamp $DISABLE_EVASION || {
-			exitcode=$?
-			[[ ${#capfiles[@]} -gt 0 ]] || {
-				# No successful capture, unsupported format?
-				# TODO: Adapt to capturer in use
-				warn "No successful capture, possible unsupported format."
-			}
-			return $exitcode
-		}
+		capture "$f" "$tfile" $stamp $DISABLE_EVASION || return $?
 		if [[ $RESULT != "$stamp" ]]; then
 			stamp=$RESULT
 			pretty=$(pretty_stamp $RESULT)
@@ -4144,7 +4069,7 @@ process() {
 			-append \
 			\( \
 				-size ${headwidth}x${headheight} \
-				-gravity NorthEast -fill "$FG_HEADING" -annotate +0-1 "$meta2" \
+				-gravity East -fill "$FG_HEADING" -annotate +0-1 "$meta2" \
 			\) \
 			-bordercolor "$BG_HEADING" -border 9 \
 		\) \
@@ -4274,14 +4199,6 @@ internal_integrity_test() {
 		"get_interval 0400 400 #Parsing shorthand"
 		# Extended syntax
 		"get_interval 30m30m1h 7200 #Repeated minutes parsing"
-
-		# File size rounding
-		"get_pretty_size 1127428915 1.05%20GiB #Leading zeroes in file size (GiB)"
-		"get_pretty_size 1132462 1.08%20MiB #Leading zeroes in file size (MiB)"
-		"get_pretty_size 1116 1.09%20KiB #Leading zeroes in file size (KiB)"
-		"get_pretty_size 1889785610 1.76%20GiB #Pretty-printed file size (GiB)"
-		"get_pretty_size 762650296 727.32%20MiB #Pretty-printed file size (MiB)"
-		"get_pretty_size 524810 512.51%20KiB #Pretty-printed file size (KiB)"
 	)
 	
 	for t in "${TESTS[@]}" ; do
@@ -4290,12 +4207,11 @@ internal_integrity_test() {
 		# Expected value
 		val=$(awk '{print $NF}' <<<$t)
 		op=$(sed "s! $val *\$!!" <<<$t) # Don't use delimiter '/', passed in some $val
-		val=${val/\%20/ }
 		[[ -n $comm ]] || comm=unnamed
 		ret=$($op) || true
 
 		if [[ $ret != "$val" ]] && fptest "$ret" -ne "$val" ; then
-			error "Failed test ($comm): '$op $val'. Expected '$val'. Got '$ret'."
+			error "Failed test ($comm): '$op $val'. Got result '$ret'."
 			(( ++retval ))
 		else
 			inf "Passed test ($comm): '$op $val'."
@@ -4360,7 +4276,7 @@ internal_integrity_test() {
 # Prints the program identification to stderr
 show_vcs_info() { # Won't be printed in quiet modes
 	# Don't colourise this
-	infplain "Video Contact Sheet *NIX v${VERSION}${SUBVERSION}, (c) 2007-2017 Toni Corvera"
+	infplain "Video Contact Sheet *NIX v${VERSION}${SUBVERSION}, (c) 2007-2014 Toni Corvera"
 }
 
 # Prints the list of options to stdout
@@ -4403,11 +4319,6 @@ show_help() {
   -Wo                   Change ffmpeg's arguments order, might work with some
                         files that fail otherwise.
   -Wc                   Disable colour in console messages.
-                        NOTE: If you have any configuration loaded before this
-                             takes effect the script might still print some
-                             colour. You can disable it completely by setting
-                             the TERM variable to a monochrome term type, e.g.:
-                             $ env TERM=vt100 vcs [options]
   Obscure options, debugging tools and workarounds:
   -R <file>
   --randomsource <file> Use the provided file as a source for \"random\" values:
@@ -5184,7 +5095,7 @@ while true ; do
 		-D) # Repeat to just test consistency
 			if [[ $DEBUGGED -gt 0 ]]; then
 				pick_tools # Simulate a normal run
-				infplain '[ svn $Rev: 675 $ ]'
+				infplain '[ svn $Rev: 583 $ ]'
 				# Even when empty, POSIXLY_CORRECT has an effect, check if it's
 				# set ([[BIS]])
 				if [[ -n ${POSIXLY_CORRECT+x} ]]; then
@@ -5211,25 +5122,6 @@ while true ; do
 				if [[ $DISABLE_EVASION -eq 1 ]]; then
 					evasion='Disabled'
 				fi
-				if type -paf lsb_release >/dev/null ; then
-					lsb_release=$(lsb_release -d | cut -d: -f2- | sed 's/^[[:space:]]*//')
-				fi
-				imversion=$(convert --version | head -1 | cut -d' ' -f2-)
-				if [[ -n "$MPLAYER_BIN" ]]; then
-					mpversion=$("$MPLAYER_BIN" --version 2>/dev/null || true)
-					# Older mplayer doesn't understand --version...
-					if grep "Unknown option" <<<"$mpversion" ; then
-						# ...But the last output line contains the version in my sample
-						mpversion=$(tail -1 <<<"$mpversion")
-					fi
-				fi
-				if [[ -n "$FFMPEG_BIN" ]]; then
-					# Older versions print to stderr, newer to stdout
-					ffversion=$("$FFMPEG_BIN" -version 2>&1 | head -1)
-					lavcversion=$("$FFMPEG_BIN" -version 2>&1 | grep libavcodec \
-								  | sed 's/[[:space:]][[:space:]]*/ /')
-					ffversion="$ffversion / $lavcversion"
-				fi
 				cat >&2 <<-EOD
 					=== Setup ===
 					GETOPT:             $GETOPT
@@ -5248,10 +5140,6 @@ while true ; do
 					=== Versions ===
 					Bash:               $BASH_VERSION
 					Getopt:             $($GETOPT --version)$awkv$sedv
-					MPlayer:            $mpversion
-					FFMpeg:             $ffversion
-					ImageMagick:        $imversion
-					LSB Description:    $lsb_release
 EOD
 				exit
 			fi
