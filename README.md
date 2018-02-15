@@ -1,27 +1,33 @@
 # BD-Upload
 Automatic Blu-ray Disk Upload Toolkit  
+
 A Script used for scanning BDinfo and take screenshots for BDISO or BDMV on Linux  
 Note that UltraHD Blu-ray is not supported yet  
 
-转发蓝光原盘时可以使用的一个脚本，支持对 BDISO,BDMV 扫描BDinfo、截图、生成缩略图、重新做种  
-目前不支持 UltraHD Blu-ray  
+转发蓝光原盘（不支持 UHD）时可以使用的一个脚本，支持对 BDISO,BDMV 扫描 BDinfo、截图、生成缩略图、重新制作种子  
+  
 
 ### Installation
 
+Dedicated Server or VPS  
 ```
-git clone https://github.com/Aniverse/bdupload
-cd bdupload && bash bdupload
+wget -qO /usr/local/bin/bdupload https://github.com/Aniverse/bdupload/raw/master/bdupload
+chmod +x bdupload
 ```
 
-
-
-
+Shared Seedbox with SSH access  
+```
+cd ; git clone https://github.com/Aniverse/bdupload
+echo "PATH=~/bdupload:$PATH" > ~/.bashrc ; PATH=~/bdupload:$PATH
+```
 
 ### Guide
 
 ![检查是否缺少软件](https://github.com/Aniverse/filesss/raw/master/Images/bdupload.01.png)
 
-一开始脚本会检查是否缺少脚本需要用到的软件，如有缺少，你可以选择用 root 权限安装所需软件，或者使用脚本内置的软件库来继续运行  
+一开始脚本会检查是否缺少脚本需要用到的软件；如有缺少，你可以选择
+1. 用 root 权限安装所需软件  
+2. 无需 root 权限，使用脚本内置的软件库来继续运行  
 
 ![正常运行界面](https://github.com/Aniverse/filesss/raw/master/Images/bdupload.02.png)
 
@@ -44,20 +50,19 @@ cd bdupload && bash bdupload
 
 - **扫描 BDinfo**  
 默认是自动扫描第一个最长的 mpls；也可以手动选择扫描哪一个 mpls  
-BDinfo 会有三个文件，一个是原版的，一个是 Main Summary，一个是 Quick Summary  
+BDinfo 会输出三个报告，一个是原版的，一个是 Main Summary，一个是 Quick Summary  
 一般而言发种写个 Quick Summary 就差不多了  
 
 - **生成缩略图**  
-这个功能默认不启用；其实一般也用不上  
+这个功能默认不启用；其实一般也用不上；用内置库运行可能会卡住  
 
 - **制作种子**  
-针对 BDISO，默认选择重新做种子；针对 BDMV，默认选择不重新做种子 
+针对 BDISO，默认选择重新制作种子；针对 BDMV，默认选择不重新制作种子 
 
 ![输出结果](https://github.com/Aniverse/filesss/raw/master/Images/bdupload.03.png)
 
 ![h5ai](https://github.com/Aniverse/filesss/raw/master/Images/bdupload.04.png)
-需要注意的是，脚本里挂载、输出文件都是指定了一个固定的目录`/etc/inexistence`  
-安装了 `h5ai` 的话可以在网页上预览、下载生成的图片和文字  
+安装了 `h5ai` 的话可以在网页上预览、下载生成的截图、BDinfo、种子  
 
 
 
