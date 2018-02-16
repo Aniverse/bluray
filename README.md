@@ -40,7 +40,8 @@ echo "PATH=~/bdupload:$PATH" > ~/.bashrc ; PATH=~/bdupload:$PATH
 
 - **自动挂载镜像**  
 本操作需要用 root 权限执行 mount 命令，如无 root 权限则无法使用  
-如果是 BDISO，会挂载成 BDMV，并问你是否需要对这个挂载生成的文件夹重命名（有时候 BDISO 的标题就是 DISC1 之类的，重命名下可能更好）  
+如果是 BDISO，会挂载成 BDMV，并问你是否需要对这个挂载生成的文件夹重命名  
+（有时候 BDISO 的标题就是 DISC1 之类的，重命名下可能更好）  
 全部操作完成后会自动解除挂载对 ISO 的挂载  
 
 - **截图**  
@@ -63,10 +64,14 @@ BDinfo 会输出三个报告，一个是原版的，一个是 Main Summary，一
 
 ![正常运行](https://github.com/Aniverse/filesss/raw/master/Images/bdupload.03.png)
 
+脚本运行中 ...
+
 ![输出结果](https://github.com/Aniverse/filesss/raw/master/Images/bdupload.04.png)
+
 如果选择扫描 BDinfo，则全部任务完成后会在 SSH 上输出 BDinfo Quick Summary，直接从 SSH 上复制即可  
 
 ![h5ai](https://github.com/Aniverse/filesss/raw/master/Images/bdupload.05.png)
+
 安装了 `h5ai` 的话可以在网页上预览、下载生成的截图、BDinfo、种子  
 
 
