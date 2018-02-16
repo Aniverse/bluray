@@ -64,7 +64,7 @@ BDinfo 会输出三个报告，一个是原版的，一个是 Main Summary，一
 
 ![正常运行](https://github.com/Aniverse/filesss/raw/master/Images/bdupload.03.png)
 
-脚本运行中 ...
+脚本运行中 ...  
 
 ![输出结果](https://github.com/Aniverse/filesss/raw/master/Images/bdupload.04.png)
 
