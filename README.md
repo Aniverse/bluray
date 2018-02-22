@@ -87,11 +87,6 @@ BDinfo 会输出三个报告，一个是原版的，一个是 Main Summary，一
 安装了 `h5ai` 的话可以在网页上预览、下载生成的截图、BDinfo、种子  
 
 
-![FH-输出结果](https://github.com/Aniverse/filesss/raw/master/Images/OLD/2018.02.16.bdupload.04.png)
-![FH-h5ai](https://github.com/Aniverse/filesss/raw/master/Images/OLD/2018.02.16.bdupload.05.png)
-
-在 FeralHosting 盒子上运行的结果  
-
 
 ### Known Issues
 
@@ -100,7 +95,7 @@ BDinfo 会输出三个报告，一个是原版的，一个是 Main Summary，一
 
 ### To Do List
 
-暂无  
+
 
 ### Under Consideration
 
@@ -109,3 +104,17 @@ BDinfo 会输出三个报告，一个是原版的，一个是 Main Summary，一
 
 - **自动上传到 ptpimg**  
 调用 ptpimg_uploader 来完成，脚本跑完后会输出 ptpimg 的链接。运行之前你需要自己配置好 ptpimg_uploader  
+
+  -------------------
+### Screenshots
+
+![FH-输出结果](https://github.com/Aniverse/filesss/raw/master/Images/OLD/2018.02.16.bdupload.04.png)
+![FH-h5ai](https://github.com/Aniverse/filesss/raw/master/Images/OLD/2018.02.16.bdupload.05.png)
+
+在 FeralHosting 盒子上运行的结果  
+
+  -------------------
+### Some references
+
+https://xxxxxx.org/forums/viewtopic?topicid=61434  
+
