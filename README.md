@@ -36,19 +36,21 @@ echo "PATH=~/bdupload:$PATH" > ~/.bashrc ; PATH=~/bdupload:$PATH
 
 - **判断是 BDISO 还是 BDMV**  
 输入一个**完整的路径**，若该路径是文件夹且内含名为 BDMV 的文件夹的话则认为该资源是 BDMV  
-不是文件夹且文件扩展名是 ISO 的则认为是 BDISO（但事实上 DVDISO 也会被认为是 BDISO）  
+文件扩展名是 ISO、且挂载后目录里有 BDMV 文件夹存在的，则认为是 BDISO  
+如果输入的文件名中出现了 HEVC、2160p、UHD 之类的字眼，则认为是 UHD Blu-ray，会提示不支持，要求重新输入  
 
 - **自动挂载镜像**  
 本操作需要用 root 权限执行 mount 命令，如无 root 权限则无法使用  
 如果是 BDISO，会挂载成 BDMV，并问你是否需要对这个挂载生成的文件夹重命名  
 （有时候 BDISO 的标题就是 DISC1 之类的，重命名下可能更好）  
-全部操作完成后会自动解除挂载对 ISO 的挂载  
+考虑到操作完成后可能还需要做种，因此脚本不做解除挂载的操作，如有需要，请使用 `jiegua` 脚本  
 
 - **截图**  
 自动寻找 BD 里体积最大的 m2ts 截 10 张 png 图，可以自定义截图分辨率  
 由于某些 BD 的实际显示分辨率和原始分辨率不一样，因此脚本对分辨率做了计算，默认使用 DAR 的分辨率  
 
 - **扫描 BDinfo**  
+BDinfo 采用 mono + bdinfocli 来实现。由于 bdinfocli 年久失修，对于 TrueHD Atmos 和 DTS:X 音轨无法较好地支持  
 默认是自动扫描第一个最长的 mpls；也可以手动选择扫描哪一个 mpls  
 BDinfo 会输出三个报告，一个是原版的，一个是 Main Summary，一个是 Quick Summary  
 一般而言发种写个 Quick Summary 就差不多了  
@@ -58,9 +60,18 @@ BDinfo 会输出三个报告，一个是原版的，一个是 Main Summary，一
 
 - **制作种子**  
 针对 BDISO，默认选择重新制作种子；针对 BDMV，默认选择不重新制作种子  
+制作种子时可以选择是否写上特定的 Tracker 地址  
+- 有一些站点比如 HD-Torrents 就必须写上站点的 Tracker  
+- 提供自定义 Tracker 地址的选项  
+- 提供 BT Trackers 的选项  
+
+- **制作种子时是否过滤非必要文件**  
+如检测到存在形如 !ANY、!FAB、disc.inf 之类的文件，会询问是否在制作种子时过滤掉这些文件  
+对于 BDISO，会把挂载出来的 BDMV 和 CERTIFICATE 复制到一个临时目录上制作种子，因此速度较慢；这个文件夹在运行完以后会保留（包含完整的 BD）  
+对于 BDMV，会把多余的文件移动到其他目录，再对原始文件夹制作种子，操作完毕后再把文件移动回来；这个临时文件夹在运行完以后会被删除  
 
 - **使用 rclone 同步文件**  
-需要你自己设置好 rclone，且在脚本里设置好 rclone remote path 才能使用（不然不会有这个选项出现）  
+需要你自己设置好 rclone，且在脚本里设置好 rclone remote path 才能使用（不然这个选项不会出现）  
 
 ![正常运行](https://github.com/Aniverse/filesss/raw/master/Images/bdupload.03.png)
 
@@ -82,7 +93,6 @@ BDinfo 会输出三个报告，一个是原版的，一个是 Main Summary，一
 
 - **判断操作是否成功**  
 目前操作中哪一步翻车了也不会有翻车了的提醒  
-
 
 ### Under Consideration
 
