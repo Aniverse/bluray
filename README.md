@@ -21,14 +21,14 @@ echo "PATH=~/bluray:$PATH" > ~/.bashrc ; PATH=~/bluray:$PATH
 
 ### Guide
 
-![检查是否缺少软件](https://github.com/Aniverse/filesss/raw/master/Images/bdupload.01.png)
+![检查是否缺少软件](https://github.com/Aniverse/filesss/raw/master/Images/2018.02.22.bluray.01.png)
 
 一开始脚本会检查是否缺少脚本需要用到的软件；如有缺少，你可以选择
 1. 用 root 权限安装所需软件  
 2. 无需 root 权限，使用脚本内置的软件库来继续运行  
 3. 退出  
 
-![询问选项](https://github.com/Aniverse/filesss/raw/master/Images/bdupload.02.png)
+![询问选项](https://github.com/Aniverse/filesss/raw/master/Images/2018.02.22.bluray.02.png)
 
 注意：路径里即使带空格也不需要双引号  
 
@@ -74,19 +74,23 @@ BDinfo 会输出三个报告，一个是原版的，一个是 Main Summary，一
 - **使用 rclone 同步文件**  
 需要你自己设置好 rclone，且在脚本里设置好 rclone remote path 才能使用（不然这个选项不会出现）  
 
-![正常运行](https://github.com/Aniverse/filesss/raw/master/Images/bdupload.03.png)
+![正常运行](https://github.com/Aniverse/filesss/raw/master/Images/2018.02.22.bluray.03.png)
 
 脚本运行中 ...  
 
-![输出结果](https://github.com/Aniverse/filesss/raw/master/Images/bdupload.04.png)
+![输出结果](https://github.com/Aniverse/filesss/raw/master/Images/2018.02.22.bluray.04.png)
 
 如果选择扫描 BDinfo，则全部任务完成后会在 SSH 上输出 BDinfo Quick Summary，直接从 SSH 上复制即可  
 
-![h5ai](https://github.com/Aniverse/filesss/raw/master/Images/bdupload.05.png)
+![h5ai](https://github.com/Aniverse/filesss/raw/master/Images/2018.02.22.bluray.05.png)
 
 安装了 `h5ai` 的话可以在网页上预览、下载生成的截图、BDinfo、种子  
 
 
+![FH-输出结果](https://github.com/Aniverse/filesss/raw/master/Images/OLD/2018.02.16.bdupload.04.png)
+![FH-h5ai](https://github.com/Aniverse/filesss/raw/master/Images/OLD/2018.02.16.bdupload.05.png)
+
+在 FeralHosting 盒子上运行的结果  
 
 
 ### Known Issues
