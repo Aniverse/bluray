@@ -9,14 +9,14 @@
 
 Dedicated Server or VPS  
 ```
-wget -qO /usr/local/bin/bdupload https://github.com/Aniverse/bdupload/raw/master/bdupload
-chmod +x bdupload
+wget -qO /usr/local/bin/bluray https://github.com/Aniverse/bdupload/raw/master/bluray
+chmod +x bluray
 ```
 
 Shared Seedbox with SSH access  
 ```
-cd ; git clone https://github.com/Aniverse/bdupload
-echo "PATH=~/bdupload:$PATH" > ~/.bashrc ; PATH=~/bdupload:$PATH
+cd ; git clone https://github.com/Aniverse/bluray
+echo "PATH=~/bluray:$PATH" > ~/.bashrc ; PATH=~/bluray:$PATH
 ```
 
 ### Guide
@@ -57,17 +57,18 @@ BDinfo 会输出三个报告，一个是原版的，一个是 Main Summary，一
 
 - **生成缩略图**  
 这个功能默认不启用；其实一般也不太用得上  
+注意：这个功能有时候运行会卡住不动，暂无解决办法 ...  
 
 - **制作种子**  
 针对 BDISO，默认选择重新制作种子；针对 BDMV，默认选择不重新制作种子  
 制作种子时可以选择是否写上特定的 Tracker 地址  
-- 有一些站点比如 HD-Torrents 就必须写上站点的 Tracker  
-- 提供自定义 Tracker 地址的选项  
-- 提供 BT Trackers 的选项  
+有一些站点比如 HD-Torrents 就必须写上站点的 Tracker  
+提供自定义 Tracker 地址的选项  
+提供 BT Trackers 的选项  
 
 - **制作种子时是否过滤非必要文件**  
-如检测到存在形如 !ANY、!FAB、disc.inf 之类的文件，会询问是否在制作种子时过滤掉这些文件  
-对于 BDISO，会把挂载出来的 BDMV 和 CERTIFICATE 复制到一个临时目录上制作种子，因此速度较慢；这个文件夹在运行完以后会保留（包含完整的 BD）  
+如检测到存在形如 !UHD、ANY!、FAB!、disc.inf 之类的文件，会询问是否在制作种子时过滤掉这些文件  
+对于 BDISO，会把挂载出来的 BDMV 和 CERTIFICATE 复制到一个临时目录上制作种子，因此速度较慢；这个文件夹在运行完以后会保留（包含完整的 BD 内容）  
 对于 BDMV，会把多余的文件移动到其他目录，再对原始文件夹制作种子，操作完毕后再把文件移动回来；这个临时文件夹在运行完以后会被删除  
 
 - **使用 rclone 同步文件**  
@@ -88,13 +89,19 @@ BDinfo 会输出三个报告，一个是原版的，一个是 Main Summary，一
 
 
 
+### Known Issues
+
+- **有时候输入正确的路径反应却不对**  
+暂无解决办法，我还不知道这是由于什么原因导致的  
 
 ### To Do List
 
-- **判断操作是否成功**  
-目前操作中哪一步翻车了也不会有翻车了的提醒  
+暂无  
 
 ### Under Consideration
+
+- **判断操作是否成功**  
+目前操作中哪一步翻车了也不会有翻车了的提醒  
 
 - **自动上传到 ptpimg**  
 调用 ptpimg_uploader 来完成，脚本跑完后会输出 ptpimg 的链接。运行之前你需要自己配置好 ptpimg_uploader  
