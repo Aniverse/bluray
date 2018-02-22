@@ -141,7 +141,7 @@ while [[ $appmissing == "Yes" ]]; do
 
         while [[ $installresponce = 0 ]]; do
             installresponce=1
-            echo -n "${yellow}${bold}What would you like to do?${white} (Default 02) ${normal}" ; read -e responce ; echo
+            echo -n "${yellow}${bold}What would you like to do?${normal} (Default 02) " ; read -e responce ; echo
         done
 
         case $responce in
@@ -180,10 +180,13 @@ echo -e "\n${bold}Good, All the needed softwares are installed ...${normal}" ; }
 function _askpath() {
 BDdetect=0
 while [ $BDdetect = 0 ]; do
-    echo ; read -ep "${yellow}${bold}Input full path to your Blu-ray Disk: ${white}${underline}" pathtostuff ; echo -n "${reset_underline}"
-#   echo ; echo -ne "${yellow}${bold}Input path to your stuff: ${white}${underline}" ; read -e pathtostuff ; echo -n "${reset_underline}"
-    [[ ` ls "$pathtostuff" 2>/dev/null ` ]] && FileExists=1 && _stufftype
-    [[ ! ` ls "$pathtostuff" 2>/dev/null ` ]] && echo -e "\n${bold}${red}ERROR${white} This file or dictionary doesn't exist! ${normal}"
+#   echo ; read -ep "${yellow}${bold}Input full path to your Blu-ray Disk: ${white}${underline}" pathtostuff ; echo -n "${reset_underline}"
+    echo ; echo -e "${yellow}${bold}Input path to your stuff: ${white}${underline}" ; read -e pathtostuff ; echo -n "${reset_underline}"
+    if [[ ` ls "$pathtostuff" 2>/dev/null ` ]]; then
+        FileExists=1 ; _stufftype
+    else
+        FileExists=0 ; echo -e "\n${bold}${red}ERROR${white} This file or dictionary doesn't exist, or it's empty! ${normal}"
+    fi
 #   if [[ $FileExists == 1 ]]; then _stufftype ; else echo "${bold}${red}ERROR${white} This file or dictionary doesn't exist! ${normal}" ; fi
 done ; }
 
@@ -191,7 +194,7 @@ done ; }
 function _stufftype() {
 
 BDname=` basename "$pathtostuff" `
-[[ ` echo "${BDname}" | grep -E "[He][Ee][Vv][Cc]" ` ]] && echo -e "\n${bold}${red}ERROR${white} It seems this is a UHD Blu-ray, which is not supported${normal}" && UHDBD=1
+UHDBD=0 ; [[ ` echo "${BDname}" | grep -E "[He][Ee][Vv][Cc]" ` ]] && echo -e "\n${bold}${red}ERROR${white} It seems this is a UHD Blu-ray, which is not supported${normal}" && UHDBD=1
 [[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "2160[Pp]" ` ]] && echo -e "\n${bold}${red}ERROR${white} It seems this is a UHD Blu-ray, which is not supported${normal}" && UHDBD=1
 [[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "\b[Uu][Hh][Dd]\b" ` ]] && echo -e "\n${bold}${red}ERROR${white} It seems this is a UHD Blu-ray, which is not supported${normal}" && UHDBD=1
 
@@ -199,21 +202,27 @@ if [[ ! $UHDBD == 1 ]] && [[ -d "${pathtostuff}" ]]; then
     if [[ `ls "${pathtostuff}" | grep BDMV` == BDMV ]]; then
         stufftype=BDMV ; BDdetect=1
         echo -ne "\n${bold}${magenta}BDMV${white} detected ... ${normal}"
+#   自动寻找 ISO 文件
+#   elif [[ `ls "${pathtostuff}" | grep -E .[Ii][Ss][Oo]\>` ]]; then
+#       stufftype=BDMV ; BDdetect=1
     else
         echo -e "\n${bold}${red}ERROR${white} This folder does not contain BDMV${normal}"
     fi
 elif [[ ! $UHDBD == 1 ]] && [[ ! -d "${pathtostuff}" ]]; then
     ifBDISO="${pathtostuff##*.}"
-    if [[ `echo "${ifBDISO}"  ; BDdetect=1| grep -E [Ii][Ss][Oo]` = [Ii][Ss][Oo] ]]; then
-        mkdir -p "/mnt/mountbluraydisk"
-        mount -o loop "$pathtostuff" "/mnt/mountbluraydisk" >> /dev/null 2>&1
-        if [[ `ls /mnt/mountdisk | grep BDMV` == BDMV ]]; then
+    if [[ `echo "${ifBDISO}" | grep -E [Ii][Ss][Oo]` = [Ii][Ss][Oo] ]]; then
+        mkdir -p /mnt/mountbluraydisk
+        mount -o loop "$pathtostuff" /mnt/mountbluraydisk > /dev/null 2>&1
+        [[ $DeBUG == 1 ]] && echo -e "\n$pathtostuff\n" && df -lh && echo && ls /mnt/mountbluraydisk
+        if [[ `ls /mnt/mountbluraydisk | grep BDMV` ]]; then
             stufftype=BDISO ; BDdetect=1
             echo -ne "\n${bold}${magenta}BDISO${white} detected ... ${normal}"
+        elif [[ `ls /mnt/mountbluraydisk | grep VIDEO_TS` ]]; then
+            echo -e "\n${bold}${red}ERROR${white} This is a DVDISO, not BDISO${normal}"
         else
-            echo -e "\n${bold}${red}ERROR${white} This ISO dis not a valid BDISO or you do not have root privileges to mount it${normal}"
+            echo -e "\n${bold}${red}ERROR${white} This is not a valid BDISO or you do not have root privileges to mount it${normal}"
         fi
-        umount "$pathtostuff" >> /dev/null 2>&1
+        umount "$pathtostuff" > /dev/null 2>&1
     else
         echo -e "\n${bold}${red}ERROR${white} This is a ${underline}${ifBDISO}${reset_underline} file, not BDISO${normal}"
 #       echo -e "\n${bold}${red}ERROR${white} This is not an ${underline}ISO${reset_underline} file${normal}"
@@ -396,30 +405,42 @@ echo -ne "${yellow}${bold}Would you like to create a new torrent file?${normal} 
 if [[ "${stufftype}" == "BDISO" ]]; then
     echo -ne "(Default: ${cyan}01${normal}) " ; read responce
     case $responce in
-        01 | 1 | "" | * ) newtorrent=Yes && ANNOUNCE="-a \"\"" ;;
-        02 | 2 ) newtorrent=Yes && _input_announce ;;
-        03 | 3 ) newtorrent=Yes && ANNOUNCE="-a http://hdts-announce.ru/announce.php" ;;
-        08 | 8 ) newtorrent=Yes
-                 ANNOUNCE="-a udp://tracker.coppersurfer.tk:6969/announce -a http://open.kickasstracker.com:80/announce -a http://bt.dl1234.com:80/announce  -a udp://tracker.safe.moe:6969/announce -a udp://9.rarbg.to:2710/announce -a udp://tracker.piratepublic.com:1337/announce -a http://tracker.opentrackr.org:1337/announce -a http://retracker.telecom.by:80/announce -a https://open.acgnxtracker.com:443/announce -a udp://tracker.xku.tv:6969/announce -a udp://thetracker.org:80/announce -a udp://bt.xxx-tracker.com:2710/announce -a http://0d.kebhana.mx:443/announce -a http://share.camoe.cn:8080/announce -a udp://inferno.demonoid.pw:3418/announce -a udp://tracker.cypherpunks.ru:6969/announce" ;;
+        01 | 1 ) newtorrent=Yes1 ; ANNOUNCE="-a \"\"" ;;
+        02 | 2 ) newtorrent=Yes2 ; _input_announce ;;
+        03 | 3 ) newtorrent=Yes3 ; ANNOUNCE="-a http://hdts-announce.ru/announce.php" ;;
+        08 | 8 ) newtorrent=Yes8 ;;
         09 | 9 ) newtorrent=No ;;
+        "" | * ) newtorrent=Yes; ANNOUNCE="-a \"\"" ;;
     esac
 else
     echo -ne "(Default: ${cyan}09${normal}) " ; read responce
     case $responce in
-        01 | 1 ) newtorrent=Yes && ANNOUNCE="-a \"\"" ;;
-        02 | 2 ) newtorrent=Yes && _input_announce ;;
-        03 | 3 ) newtorrent=Yes && ANNOUNCE="-a http://hdts-announce.ru/announce.php" ;;
-        08 | 8 ) newtorrent=Yes
-                 ANNOUNCE="-a udp://tracker.coppersurfer.tk:6969/announce -a http://open.kickasstracker.com:80/announce -a http://bt.dl1234.com:80/announce  -a udp://tracker.safe.moe:6969/announce -a udp://9.rarbg.to:2710/announce -a udp://tracker.piratepublic.com:1337/announce -a http://tracker.opentrackr.org:1337/announce -a http://retracker.telecom.by:80/announce -a https://open.acgnxtracker.com:443/announce -a udp://tracker.xku.tv:6969/announce -a udp://thetracker.org:80/announce -a udp://bt.xxx-tracker.com:2710/announce -a http://0d.kebhana.mx:443/announce -a http://share.camoe.cn:8080/announce -a udp://inferno.demonoid.pw:3418/announce -a udp://tracker.cypherpunks.ru:6969/announce" ;;
-        09 | 9 | "" | * ) newtorrent=No ;;
+        01 | 1 ) newtorrent=Yes1 ; ANNOUNCE="-a \"\"" ;;
+        02 | 2 ) newtorrent=Yes2 ; _input_announce ;;
+        03 | 3 ) newtorrent=Yes3 ; ANNOUNCE="-a http://hdts-announce.ru/announce.php" ;;
+        08 | 8 ) newtorrent=Yes8 ;;
+        09 | 9 ) newtorrent=No ;;
+        "" | * ) newtorrent=No ;;
     esac
 fi
 
-if [[ "${newtorrent}" == "Yes" ]]; then
-     BDUSELESS=` ls "$bdpath" | grep -v CERTIFICATE | grep -v BDMV | tr "\n" "  " `
-     [[ "$BDUSELESS" ]] && USELESS=1
-     echo -e "The script will create a new torrent"
-else echo -e "The script will not create a new torrent" ; fi ; echo ; }
+if [[ $newtorrent == No ]]; then
+    echo -e "The script will not create a new torrent"
+else    
+    BDUSELESS=` ls "$bdpath" | grep -v CERTIFICATE | grep -v BDMV | tr "\n" "  " `
+    [[ "$BDUSELESS" ]] && USELESS=1
+fi
+
+if [[ $newtorrent == Yes1 ]]; then
+    newtorrent=Yes ; echo -e "The script will create a new torrent with empty announce"
+elif [[ $newtorrent == Yes2 ]]; then
+    newtorrent=Yes ; echo -e "The script will create a new torrent with the announce you input"
+elif [[ $newtorrent == Yes3 ]]; then
+    newtorrent=Yes ; echo -e "The script will create a new torrent with HD-Torrents' announce"
+elif [[ $newtorrent == Yes8 ]]; then
+    newtorrent=Yes ; echo -e "The script will create a new torrent with public trackers' announce"
+    ANNOUNCE="-a udp://tracker.coppersurfer.tk:6969/announce -a http://open.kickasstracker.com:80/announce -a http://bt.dl1234.com:80/announce  -a udp://tracker.safe.moe:6969/announce -a udp://9.rarbg.to:2710/announce -a udp://tracker.piratepublic.com:1337/announce -a http://tracker.opentrackr.org:1337/announce -a http://retracker.telecom.by:80/announce -a https://open.acgnxtracker.com:443/announce -a udp://tracker.xku.tv:6969/announce -a udp://thetracker.org:80/announce -a udp://bt.xxx-tracker.com:2710/announce -a http://0d.kebhana.mx:443/announce -a http://share.camoe.cn:8080/announce -a udp://inferno.demonoid.pw:3418/announce -a udp://tracker.cypherpunks.ru:6969/announce"
+fi ; echo ; }
 
 # 询问要用的 Tracker URL
 function _input_announce() { echo "${yellow}${bold}" ; read -e -p "Input your tracker announce: ${normal}${blue}" TRACKERA ; echo "${normal}" ; ANNOUNCE="-a $TRACKERA" ; }
@@ -428,8 +449,8 @@ function _input_announce() { echo "${yellow}${bold}" ; read -e -p "Input your tr
 function _askuselessfiles() {
 
 echo "${bold}Some non-essential files are inclueded in Blu-ray, such as ${red}${BDUSELESS}${normal}${bold}"
-[[ "${stufftype}" == "BDISO" ]] && echo "For BDISO, as it's mounted as read-only file system, removing non-essential files needs copying files"
-echo -n "${yellow}would you like to remove the non-essential files temporarily when creating new torrents? ${normal}[${cyan}Y${normal}]es or [N]o "; read responce
+[[ "${stufftype}" == "BDISO" ]] && echo -e "For BDISO, as it's mounted as read-only file system, it will take some time to copy files"
+echo -n "${yellow}Would you like to remove these files temporarily when creating new torrents? ${normal}[${cyan}Y${normal}/n]"; read responce
 case $responce in
     [yY] | [yY][Ee][Ss] | "" | * )  movefile=Yes ;;
     [nN] | [nN][Oo]              )  movefile=No ;;
@@ -440,10 +461,6 @@ if [[ $movefile == Yes ]]; then
     mkdir -p "/etc/inexistence/06.BluRay/temp/$file_title_clean"
     if [[ "${stufftype}" == "BDISO" ]]; then
         copy_bdiso_to_bdmv=1
-        mkdir -p "/etc/inexistence/06.BluRay/temp/$file_title_clean/{BDMV,CERTIFICATE}"
-        cp -rf "$bdpath"/BDMV "/etc/inexistence/06.BluRay/temp/$file_title_clean"/BDMV
-        cp -rf "$bdpath"/CERTIFICATE "/etc/inexistence/06.BluRay/temp/$file_title_clean"/CERTIFICATE
-        bdpath="/etc/inexistence/06.BluRay/temp/$file_title_clean"
     else
         move_when_complete=1 ; working_path="$(pwd)"
         cd "$bdpath"
@@ -571,7 +588,16 @@ echo -e "\n\n${bold}${green}Taking screenshots DONE${normal}\n\n" ; }
 function _takethumbnail() { vcs "${main_m2ts_path}" -U0 -n 24 -c 4 -H200 -a 16/9 -o "${outputpath}/thumbs.png" && echo -e "\n\n${bold}${green}Generating thumbnails DONE${normal}\n\n" ; }
 
 # 制作种子
-function _mktorrent() { mktorrent -v -p -l 24 $ANNOUNCE -o "${outputpath}/${file_title_clean}.torrent" "$bdpath" && echo -e "\n\n${bold}${green}Creating torrents DONE${normal}\n\n" ; }
+function _mktorrent() {
+if [[ $copy_bdiso_to_bdmv == 1 ]]; then
+    mkdir -p "/etc/inexistence/06.BluRay/temp/$file_title_clean"
+    echo -ne "Copying files from mounted BDISO ... "
+    cp -rf "$bdpath/BDMV" "/etc/inexistence/06.BluRay/temp/$file_title_clean"/BDMV
+    cp -rf "$bdpath/CERTIFICATE" "/etc/inexistence/06.BluRay/temp/$file_title_clean"/CERTIFICATE
+    echo -e "${green}DONE${normal}"
+    bdpath="/etc/inexistence/06.BluRay/temp/$file_title_clean"
+fi
+mktorrent -v -p -l 24 $ANNOUNCE -o "${outputpath}/${file_title_clean}.torrent" "$bdpath" && echo -e "\n\n${bold}${green}Creating torrents DONE${normal}\n\n" ; }
 
 # rclone 上传
 function _rcloneup() { rclone copy -v --stats 5s "${outputpath}" "${RCLONEPATH}" && echo -e "\n\n${bold}${green}rclone transfer DONE${normal}\n\n" ; }
@@ -579,8 +605,6 @@ function _rcloneup() { rclone copy -v --stats 5s "${outputpath}" "${RCLONEPATH}"
 
 
 
-#    mv /etc/inexistence/06.BluRay/temp/TWIN_PEAKS_D3/* "/home/black/deluge/download/Twin Peaks S02/TWIN_PEAKS_D3"
-#    /home/black/deluge/download/Twin Peaks S02/TWIN_PEAKS_D3
 
 
 
@@ -595,6 +619,7 @@ endtime=$(date +%s)
 timeused=$(( $endtime - $starttime ))
 
 clear ; echo -e "${bold}Done. Files created in ${yellow}\"${outputpath}\"${normal}"
+[[ $copy_bdiso_to_bdmv == 1 ]] && echo -e "${bold}BDISO copied to ${yellow}\"${bdpath}\"${normal}"
 
 if [[ ! "${bdscan}" == "no" ]] ; then
     echo -e "\n${bold}${blue}--------------------------------------------- BDinfo Quick Summary ---------------------------------------------${normal}\n"
@@ -638,4 +663,5 @@ _getinfo
 [[ $newtorrent == Yes ]] && _mktorrent
 [[ $rcloneup == Yes ]] && _rcloneup
 _end
+
 
