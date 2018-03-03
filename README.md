@@ -1,4 +1,4 @@
-# BD-Upload
+# Blu-ray
 > Automatic Blu-ray Disk Upload Toolkit  
 > A Script used for scanning BDinfo and take screenshots for BDISO or BDMV on Linux  
 
