@@ -9,14 +9,14 @@
 
 Dedicated Server or VPS  
 ```
-wget -qO /usr/local/bin/bluray https://github.com/Aniverse/bdupload/raw/master/bluray
+wget -qO /usr/local/bin/bluray https://github.com/Aniverse/bluray/raw/master/bluray
 chmod +x bluray
 ```
 
 Shared Seedbox with SSH access  
 ```
 cd ; git clone https://github.com/Aniverse/bluray
-echo "PATH=~/bluray:$PATH" > ~/.bashrc ; PATH=~/bluray:$PATH
+echo "PATH=~/bluray:$PATH" >> ~/.bashrc ; PATH=~/bluray:$PATH
 ```
 
 ### Guide
