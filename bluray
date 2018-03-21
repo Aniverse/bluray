@@ -217,7 +217,7 @@ if [[ ! $UHDBD == 1 ]] && [[ -d "${pathtostuff}" ]]; then
         echo -ne "\n${bold}${magenta}BDMV${jiacu} detected ... ${normal}"
 #   没有 BDMV 文件夹但是有 ISO 文件 (首发圆盘往往是一个文件夹里塞着一个BDISO)
 #   只选择其中 find 命令结果中排名第一的 ISO，若还有其他 ISO 则会被无视
-    elif [[ `ls "${pathtostuff}" | grep -E .[Ii][Ss][Oo]\>` ]]; then
+    elif [[ `  ls "${pathtostuff}" | grep -E '.[Ii][Ss][Oo]\>'  ` ]]; then
        pathtostuff=` find "$pathtostuff" -name "*.[Ii][Ss][Oo]" | head -n1 `
        echo -e "${bold}Find an ISO file which is ${underline}${pathtostuff}${reset_underline}${normal}"
        _iso_check
