@@ -551,17 +551,17 @@ function _getinfo() {
 [[ "${bdscan}" == "manual" ]] && mono "${bdinfocli_path}" "${bdpath}" "${outputpath}"
 
 if [[ ! "${bdscan}" == "no" ]]; then
-    sed -n '/QUICK SUMMARY/,//p' "${outputpath}/BDINFO.${file_title}.txt" > temptext
+    sed -n '/QUICK SUMMARY/,//p' "${outputpath}/BDINFO.${file_title_clean}.txt" > temptext
     count=`wc -l temptext | awk '{print $1-1}' `
     head -n $count temptext > "${outputpath}/bdinfo.quick.summary.txt"
     rm temptext
 
-    sed -n '/DISC INFO/,/FILES/p' "${outputpath}/BDINFO.${file_title}.txt" > temptext
+    sed -n '/DISC INFO/,/FILES/p' "${outputpath}/BDINFO.${file_title_clean}.txt" > temptext
     count=`wc -l temptext | awk '{print $1-2}' `
     head -n $count temptext > "${outputpath}/bdinfo.main.summary.txt"
     rm temptext
 
-    mv "${outputpath}/BDINFO.${file_title}.txt" "${outputpath}/bdinfo.txt"
+    mv "${outputpath}/BDINFO.${file_title_clean}.txt" "${outputpath}/bdinfo.txt"
     echo -e "\n\n${bold}${green}Scanning BDinfo DONE${normal}\n\n"
 fi ; }
 
