@@ -28,9 +28,11 @@ baihuangse=${white}${on_yellow}; bailanse=${white}${on_blue}; bailvse=${white}${
 baiqingse=${white}${on_cyan}; baihongse=${white}${on_red}; baizise=${white}${on_magenta};
 heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis); guangbiao=$(tput cnorm)
 # --------------------------------------------------------------------------------
-BDDATE=20180225
-BDVER=2.2.3
+BDDATE=20180321
+BDVER=2.3.0
 DeBUG=0
+# --------------------------------------------------------------------------------
+[[ $1 == -d ]] && DeBUG=1
 # --------------------------------------------------------------------------------
 bdinfocli_path="/etc/inexistence/02.Tools/bdinfocli.exe"
 # --------------------------------------------------------------------------------
@@ -119,13 +121,14 @@ bdinfocli_path="$DIR"/tools/bdinfocli.exe ; }
 function _intro() {
 
 [[ $NoInstall == 0 ]] && _check_install_2
-[[ $appmissing == "Yes" ]] && _logo
+[[ $appmissing == Yes ]] && _logo
 
 NoRoot=0 ; [[ $EUID != 0 ]] && NoRoot=1
 
 [[ $NoInstall == 1 ]] && echo -e "${bold}We will use bulit-in library ...${normal}" && _check_library
 
-while [[ $appmissing == "Yes" ]]; do
+
+while [[ $appmissing == Yes ]]; do
 
     echo -e "\n01) ${cyan}Install them to system with root privilege${white}"
     echo "02) ${cyan}Use bluray script built-in library${white}"
@@ -135,9 +138,13 @@ while [[ $appmissing == "Yes" ]]; do
 
     installdone=0
 
+
+
     while [[ $installdone = 0 ]]; do
 
         installresponce=0
+
+
 
         while [[ $installresponce = 0 ]]; do
             installresponce=1
@@ -166,7 +173,10 @@ while [[ $appmissing == "Yes" ]]; do
 
     done
 
+
+
 done
+
 
 _logo
 [[ $NoRoot == 1 ]] && echo -e "\n${bold}Since you run this script without root privileges, BDISO is not supported${normal}"
@@ -190,6 +200,8 @@ while [ $BDdetect = 0 ]; do
 #   if [[ $FileExists == 1 ]]; then _stufftype ; else echo "${bold}${red}ERROR${white} This file or dictionary doesn't exist! ${normal}" ; fi
 done ; }
 
+
+
 # 检查是不是 BDMV 或者 BDISO，是不是 UHD BD
 function _stufftype() {
 
@@ -199,35 +211,47 @@ UHDBD=0 ; [[ ` echo "${BDname}" | grep -E "[He][Ee][Vv][Cc]" ` ]] && echo -e "\n
 [[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "\b[Uu][Hh][Dd]\b" ` ]] && echo -e "\n${bold}${red}ERROR${white} It seems this is a UHD Blu-ray, which is not supported${normal}" && UHDBD=1
 
 if [[ ! $UHDBD == 1 ]] && [[ -d "${pathtostuff}" ]]; then
+#   文件夹路径下包含名为 BDMV 的文件，认为是 BDMV
     if [[ `ls "${pathtostuff}" | grep BDMV` == BDMV ]]; then
         stufftype=BDMV ; BDdetect=1
         echo -ne "\n${bold}${magenta}BDMV${white} detected ... ${normal}"
-#   自动寻找 ISO 文件 (首发圆盘往往是一个文件夹里塞着一个BDISO)
-#   elif [[ `ls "${pathtostuff}" | grep -E .[Ii][Ss][Oo]\>` ]]; then
-#       stufftype=BDISO ; BDdetect=1
+#   没有 BDMV 文件夹但是有 ISO 文件 (首发圆盘往往是一个文件夹里塞着一个BDISO)
+#   只选择其中 find 命令结果中排名第一的 ISO，若还有其他 ISO 则会被无视
+    elif [[ `ls "${pathtostuff}" | grep -E .[Ii][Ss][Oo]\>` ]]; then
+       pathtostuff=` find "$pathtostuff" -name "*.[Ii][Ss][Oo]" | head -n1 `
+       echo -e "${bold}Find an ISO file which is ${underline}${pathtostuff}${reset_underline}${normal}"
+       _iso_check
+#   所输入的文件夹目录下即不存在 BDMV 文件夹也不存在 ISO 文件
     else
         echo -e "\n${bold}${red}ERROR${white} This folder does not contain BDMV or BDISO${normal}"
     fi
 elif [[ ! $UHDBD == 1 ]] && [[ ! -d "${pathtostuff}" ]]; then
     ifBDISO="${pathtostuff##*.}"
+#   文件扩展名为 ISO
     if [[ `echo "${ifBDISO}" | grep -E [Ii][Ss][Oo]` = [Ii][Ss][Oo] ]]; then
-        mkdir -p /mnt/mountbluraydisk
-        mount -o loop "$pathtostuff" /mnt/mountbluraydisk > /dev/null 2>&1
-        [[ $DeBUG == 1 ]] && echo -e "\n$pathtostuff\n" && df -lh && echo && ls /mnt/mountbluraydisk
-        if [[ `ls /mnt/mountbluraydisk | grep BDMV` ]]; then
-            stufftype=BDISO ; BDdetect=1
-            echo -ne "\n${bold}${magenta}BDISO${white} detected ... ${normal}"
-        elif [[ `ls /mnt/mountbluraydisk | grep VIDEO_TS` ]]; then
-            echo -e "\n${bold}${red}ERROR${white} This is a DVDISO, not BDISO${normal}"
-        else
-            echo -e "\n${bold}${red}ERROR${white} This is not a valid BDISO or you do not have root privileges to mount it${normal}"
-        fi
-        umount "$pathtostuff" > /dev/null 2>&1
+        _iso_check
     else
-#       echo -e "\n${bold}${red}ERROR${white} This is a ${underline}${ifBDISO}${reset_underline} file, not BDISO${normal}"
+       #echo -e "\n${bold}${red}ERROR${white} This is a ${underline}${ifBDISO}${reset_underline} file, not BDISO${normal}"
         echo -e "\n${bold}${red}ERROR${white} This is not an ${underline}ISO${reset_underline} file${normal}"
     fi
 fi ; }
+
+
+
+# 检查 ISO 是不是可用的 BDISO（这个功能可能会引发 bug：明明确实是原盘但却无法识别出来，原因不明，故暂时搁置，不做处理）
+function _iso_check() {
+mkdir -p /mnt/mountbluraydisk
+mount -o loop "$pathtostuff" /mnt/mountbluraydisk > /dev/null 2>&1
+[[ $DeBUG == 1 ]] && echo -e "\n$pathtostuff\n" && df -lh && echo && ls /mnt/mountbluraydisk
+if [[ `ls /mnt/mountbluraydisk | grep BDMV` ]]; then
+    stufftype=BDISO ; BDdetect=1
+    echo -ne "\n${bold}${magenta}BDISO${white} detected ... ${normal}"
+elif [[ `ls /mnt/mountbluraydisk | grep VIDEO_TS` ]]; then
+    echo -e "\n${bold}${red}ERROR${white} This is a DVDISO, not BDISO${normal}"
+else
+    echo -e "\n${bold}${red}ERROR${white} This is not a valid BDISO or you do not have root privileges to mount it${normal}"
+fi
+umount "$pathtostuff" > /dev/null 2>&1 ; }
 
 
 
@@ -255,10 +279,11 @@ elif [[ "${stufftype}" == "BDMV" ]]; then
     file_title=`basename "$bdmvpath"`
 fi
 
-file_title_clean="$(echo "$file_title" | tr '[:space:]' '.')"
-file_title_clean="$(echo "$file_title_clean" | sed s'/[.]$//')"
-file_title_clean="$(echo "$file_title_clean" | tr -d '(')"
-file_title_clean="$(echo "$file_title_clean" | tr -d ')')"
+file_title_clean="$(  echo "$file_title" | tr '[:space:]' '.'  )"
+file_title_clean="$(  echo "$file_title_clean" | sed s'/[.]$//'  )"
+file_title_clean="$(  echo "$file_title_clean" | tr -d '('  )"
+file_title_clean="$(  echo "$file_title_clean" | tr -d ')'  )"
+file_title_clean="`   echo "$file_title_clean" | sed 's/\//\./'   `"
 
 if [[ "${stufftype}" == "BDISO" ]]; then
     mkdir -p "/etc/inexistence/06.BluRay/$file_title_clean"
@@ -326,7 +351,7 @@ echo -e "02) ${cyan}Auto detect${white}"
 echo -e "03) ${cyan}Auto detect with DAR${white}"
 echo -e "04) ${cyan}Input a specific resolution${white}"
 echo -e "05) ${cyan}Do not take screenshots${white}"
-echo -ne "${yellow}${bold}Which resolution of the screenshots you want?${normal} (Default: ${cyan}03${normal})"; read response
+echo -ne "${yellow}${bold}Which resolution of the screenshots do you want?${normal} (Default: ${cyan}03${normal})"; read response
 
 case $response in
     01 | 1 ) resolution=1080p ;;
