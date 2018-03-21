@@ -219,7 +219,7 @@ if [[ ! $UHDBD == 1 ]] && [[ -d "${pathtostuff}" ]]; then
 #   只选择其中 find 命令结果中排名第一的 ISO，若还有其他 ISO 则会被无视
     elif [[ `  ls "${pathtostuff}" | grep -E '.[Ii][Ss][Oo]\>'  ` ]]; then
        pathtostuff=` find "$pathtostuff" -name "*.[Ii][Ss][Oo]" | head -n1 `
-       echo -e "${bold}Find an ISO file which is ${underline}${pathtostuff}${reset_underline}${normal}"
+       echo -e "\n${yellow}${bold}Find an ISO file which is ${underline}${pathtostuff}${reset_underline}${normal}"
        _iso_check
 #   所输入的文件夹目录下即不存在 BDMV 文件夹也不存在 ISO 文件
     else
@@ -477,11 +477,12 @@ function _askuselessfiles() {
 
 echo "${bold}Some non-essential files are inclueded in Blu-ray, such as ${red}${BDUSELESS}${normal}${bold}"
 [[ "${stufftype}" == "BDISO" ]] && echo -e "For BDISO, as it's mounted as read-only file system, it will take some time to copy files"
-echo -n "${yellow}Would you like to remove these files temporarily when creating new torrents? ${normal}[${cyan}Y${normal}/n]"; read responce
+echo -n "${yellow}Would you like to remove these files temporarily when creating new torrents? ${normal}[Y/${cyan}n${normal}]" ; read responce
+
 case $responce in
     [yY] | [yY][Ee][Ss] )  movefile=Yes ;;
     [nN] | [nN][Oo]     )  movefile=No  ;;
-    ""   | *            )  movefile=Yes ;;
+    ""   | *            )  movefile=No  ;;
 esac
 
 if [[ $movefile == Yes ]]; then
