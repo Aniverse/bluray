@@ -25,11 +25,11 @@ on_magenta=$(tput setab 5); on_cyan=$(tput setab 6); on_white=$(tput setab 7); b
 dim=$(tput dim); underline=$(tput smul); reset_underline=$(tput rmul); standout=$(tput smso);
 reset_standout=$(tput rmso); normal=$(tput sgr0); alert=${white}${on_red}; title=${standout};
 baihuangse=${white}${on_yellow}; bailanse=${white}${on_blue}; bailvse=${white}${on_green};
-baiqingse=${white}${on_cyan}; baihongse=${white}${on_red}; baizise=${white}${on_magenta};
+baiqingse=${white}${on_cyan}; baihongse=${white}${on_red}; baizise=${white}${on_magenta}; jiacu=${normal}${bold}
 heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis); guangbiao=$(tput cnorm)
 # --------------------------------------------------------------------------------
 BDDATE=20180321
-BDVER=2.3.0
+BDVER=2.3.3
 DeBUG=0
 # --------------------------------------------------------------------------------
 [[ $1 == -d ]] && DeBUG=1
@@ -130,9 +130,9 @@ NoRoot=0 ; [[ $EUID != 0 ]] && NoRoot=1
 
 while [[ $appmissing == Yes ]]; do
 
-    echo -e "\n01) ${cyan}Install them to system with root privilege${white}"
-    echo "02) ${cyan}Use bluray script built-in library${white}"
-    echo "03) ${cyan}Exit${white}"
+    echo -e "\n01) ${cyan}Install them to system with root privilege${normal}"
+    echo "02) ${cyan}Use bluray script built-in library${normal}"
+    echo "03) ${cyan}Exit${normal}"
 
     echo -e "${bold}Oooops, ${baihongse}${tmpmissingapp%?}${normal}${bold} is missing, without them the script can't work"
 
@@ -190,14 +190,14 @@ echo -e "\n${bold}Good, All the needed softwares are installed ...${normal}" ; }
 function _askpath() {
 BDdetect=0
 while [ $BDdetect = 0 ]; do
-#   echo ; read -ep "${yellow}${bold}Input full path to your Blu-ray Disk: ${white}${underline}" pathtostuff ; echo -n "${reset_underline}"
-    echo ; echo -e "${yellow}${bold}Input path to your stuff: ${white}${underline}" ; read -e pathtostuff ; echo -n "${reset_underline}"
+#   echo ; read -ep "${yellow}${bold}Input full path to your Blu-ray Disk: ${jiacu}${underline}" pathtostuff ; echo -n "${reset_underline}"
+    echo ; echo -e "${yellow}${bold}Input path to your stuff: ${jiacu}${underline}" ; read -e pathtostuff ; echo -n "${reset_underline}"
     if [[ ` ls "$pathtostuff" 2>/dev/null ` ]]; then
         FileExists=1 ; _stufftype
     else
-        FileExists=0 ; echo -e "\n${bold}${red}ERROR${white} This file or dictionary doesn't exist, or it's empty${normal}"
+        FileExists=0 ; echo -e "\n${bold}${red}ERROR${jiacu} This file or dictionary doesn't exist, or it's empty${normal}"
     fi
-#   if [[ $FileExists == 1 ]]; then _stufftype ; else echo "${bold}${red}ERROR${white} This file or dictionary doesn't exist! ${normal}" ; fi
+#   if [[ $FileExists == 1 ]]; then _stufftype ; else echo "${bold}${red}ERROR${jiacu} This file or dictionary doesn't exist! ${normal}" ; fi
 done ; }
 
 
@@ -206,15 +206,15 @@ done ; }
 function _stufftype() {
 
 BDname=` basename "$pathtostuff" `
-UHDBD=0 ; [[ ` echo "${BDname}" | grep -E "[He][Ee][Vv][Cc]" ` ]] && echo -e "\n${bold}${red}ERROR${white} It seems this is a UHD Blu-ray, which is not supported${normal}" && UHDBD=1
-[[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "2160[Pp]" ` ]] && echo -e "\n${bold}${red}ERROR${white} It seems this is a UHD Blu-ray, which is not supported${normal}" && UHDBD=1
-[[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "\b[Uu][Hh][Dd]\b" ` ]] && echo -e "\n${bold}${red}ERROR${white} It seems this is a UHD Blu-ray, which is not supported${normal}" && UHDBD=1
+UHDBD=0 ; [[ ` echo "${BDname}" | grep -E "[He][Ee][Vv][Cc]" ` ]] && echo -e "\n${bold}${red}ERROR${jiacu} It seems this is a UHD Blu-ray, which is not supported${normal}" && UHDBD=1
+[[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "2160[Pp]" ` ]] && echo -e "\n${bold}${red}ERROR${jiacu} It seems this is a UHD Blu-ray, which is not supported${normal}" && UHDBD=1
+[[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "\b[Uu][Hh][Dd]\b" ` ]] && echo -e "\n${bold}${red}ERROR${jiacu} It seems this is a UHD Blu-ray, which is not supported${normal}" && UHDBD=1
 
 if [[ ! $UHDBD == 1 ]] && [[ -d "${pathtostuff}" ]]; then
 #   文件夹路径下包含名为 BDMV 的文件，认为是 BDMV
     if [[ `ls "${pathtostuff}" | grep BDMV` == BDMV ]]; then
         stufftype=BDMV ; BDdetect=1
-        echo -ne "\n${bold}${magenta}BDMV${white} detected ... ${normal}"
+        echo -ne "\n${bold}${magenta}BDMV${jiacu} detected ... ${normal}"
 #   没有 BDMV 文件夹但是有 ISO 文件 (首发圆盘往往是一个文件夹里塞着一个BDISO)
 #   只选择其中 find 命令结果中排名第一的 ISO，若还有其他 ISO 则会被无视
     elif [[ `ls "${pathtostuff}" | grep -E .[Ii][Ss][Oo]\>` ]]; then
@@ -223,7 +223,7 @@ if [[ ! $UHDBD == 1 ]] && [[ -d "${pathtostuff}" ]]; then
        _iso_check
 #   所输入的文件夹目录下即不存在 BDMV 文件夹也不存在 ISO 文件
     else
-        echo -e "\n${bold}${red}ERROR${white} This folder does not contain BDMV or BDISO${normal}"
+        echo -e "\n${bold}${red}ERROR${jiacu} This folder does not contain BDMV or BDISO${normal}"
     fi
 elif [[ ! $UHDBD == 1 ]] && [[ ! -d "${pathtostuff}" ]]; then
     ifBDISO="${pathtostuff##*.}"
@@ -231,8 +231,8 @@ elif [[ ! $UHDBD == 1 ]] && [[ ! -d "${pathtostuff}" ]]; then
     if [[ `echo "${ifBDISO}" | grep -E [Ii][Ss][Oo]` = [Ii][Ss][Oo] ]]; then
         _iso_check
     else
-       #echo -e "\n${bold}${red}ERROR${white} This is a ${underline}${ifBDISO}${reset_underline} file, not BDISO${normal}"
-        echo -e "\n${bold}${red}ERROR${white} This is not an ${underline}ISO${reset_underline} file${normal}"
+       #echo -e "\n${bold}${red}ERROR${jiacu} This is a ${underline}${ifBDISO}${reset_underline} file, not BDISO${normal}"
+        echo -e "\n${bold}${red}ERROR${jiacu} This is not an ${underline}ISO${reset_underline} file${normal}"
     fi
 fi ; }
 
@@ -245,13 +245,13 @@ mount -o loop "$pathtostuff" /mnt/mountbluraydisk > /dev/null 2>&1
 [[ $DeBUG == 1 ]] && echo -e "\n$pathtostuff\n" && df -lh && echo && ls /mnt/mountbluraydisk
 if [[ `ls /mnt/mountbluraydisk | grep BDMV` ]]; then
     stufftype=BDISO ; BDdetect=1
-    echo -ne "\n${bold}${magenta}BDISO${white} detected ... ${normal}"
+    echo -ne "\n${bold}${magenta}BDISO${jiacu} detected ... ${normal}"
 elif [[ `ls /mnt/mountbluraydisk | grep VIDEO_TS` ]]; then
-    echo -e "\n${bold}${red}ERROR${white} This is a DVDISO, not BDISO${normal}"
+    echo -e "\n${bold}${red}ERROR${jiacu} This is a DVDISO, not BDISO${normal}"
 else
-    echo -e "\n${bold}${red}ERROR${white} This is not a valid BDISO or you do not have root privileges to mount it${normal}"
+    echo -e "\n${bold}${red}ERROR${jiacu} This is not a valid BDISO or you do not have root privileges to mount it${normal}"
 fi
-umount "$pathtostuff" > /dev/null 2>&1 ; }
+umount /mnt/mountbluraydisk > /dev/null 2>&1 ; }
 
 
 
@@ -291,8 +291,7 @@ if [[ "${stufftype}" == "BDISO" ]]; then
     mount -o loop "$bdisopath" "$bdpath" >> /dev/null 2>&1
 fi
 
-tempvar=$(find "$bdpath" -type f -print0 | xargs -0 ls -1S)
-main_m2ts_path=$(echo "$tempvar" | head -n 1)
+main_m2ts_path=$(  find "$bdpath" -name "*.m2ts" -print0 | xargs -0 ls -1S | head -n1  )
 duration1=$(ffmpeg -i "$main_m2ts_path" 2>&1 | egrep '(Duration:)' | cut -d ' ' -f4 | cut -c1-8)
 duration2=`date -u -d "1970-01-01 $duration1" +%s`
 
@@ -317,9 +316,9 @@ echo ; }
 # 询问是否扫描BDinfo
 function _askscan() {
 echo -n ""
-echo -e "01) ${cyan}Auto scan the first longest playlist${white}"
-echo -e "02) ${cyan}Manually select which playlist to scan${white}"
-echo -e "03) ${cyan}Do not scan BDinfo${white}"
+echo -e "01) ${cyan}Auto scan the first longest playlist${normal}"
+echo -e "02) ${cyan}Manually select which playlist to scan${normal}"
+echo -e "03) ${cyan}Do not scan BDinfo${normal}"
 echo -ne "${yellow}${bold}Whould you like to scan BDinfo?${normal} (Default: ${cyan}01${normal}) "; read response
 
 case $response in
@@ -346,11 +345,11 @@ echo ; }
 # 询问截图的分辨率
 function _askresolution() {
 
-echo -e "01) ${cyan}1920x1080${white}"
-echo -e "02) ${cyan}Auto detect${white}"
-echo -e "03) ${cyan}Auto detect with DAR${white}"
-echo -e "04) ${cyan}Input a specific resolution${white}"
-echo -e "05) ${cyan}Do not take screenshots${white}"
+echo -e "01) ${cyan}1920x1080${normal}"
+echo -e "02) ${cyan}Auto detect${normal}"
+echo -e "03) ${cyan}Auto detect with DAR${normal}"
+echo -e "04) ${cyan}Input a specific resolution${normal}"
+echo -e "05) ${cyan}Do not take screenshots${normal}"
 echo -ne "${yellow}${bold}Which resolution of the screenshots do you want?${normal} (Default: ${cyan}03${normal})"; read response
 
 case $response in
@@ -390,7 +389,7 @@ elif [[ "${resolution}" == "auto" ]]; then
     echo -e "The script will take 10 screenshots in original resolution"
 elif [[ "${resolution}" == "input" ]]; then
     echo ; read -e -p "Input the screenshots' resolution you want: ${green}" -i 1280x720 fenbianlv
-    echo -e "${white}\nThe script will take 10 screenshots in ${green}$fenbianlv${white}"
+    echo -e "${normal}\nThe script will take 10 screenshots in ${green}$fenbianlv${normal}"
 elif [[ "${resolution}" == "no" ]]; then
     echo -e "The script will not take screenshots"
 fi
@@ -422,11 +421,11 @@ esac
 function _askmktorrent() {
 
 echo -e "
-01) ${cyan}Create a new torrent with empty announce${white}
-02) ${cyan}Create a new torrent and specify an announce${white}
-03) ${cyan}Create a new torrent for HD-Torrents${white}
-08) ${cyan}Create a new torrent for public trackers${white}
-09) ${cyan}Do not create new torrent${white}"
+01) ${cyan}Create a new torrent with empty announce${normal}
+02) ${cyan}Create a new torrent and specify an announce${normal}
+03) ${cyan}Create a new torrent for HD-Torrents${normal}
+08) ${cyan}Create a new torrent for public trackers${normal}
+09) ${cyan}Do not create new torrent${normal}"
 echo -ne "${yellow}${bold}Would you like to create a new torrent file?${normal} "
 
 if [[ "${stufftype}" == "BDISO" ]]; then
@@ -525,11 +524,11 @@ clear ; starttime=$(date +%s) ; echo -e "${bold}${blue}Work start!\n${normal}" ;
 
 # Debug
 function _debug() {
-echo -e "${yellow}${bold}DeBUG${white}
+echo -e "${yellow}${bold}DeBUG${jiacu}
 outputpath = $outputpath
 bdpath = $bdpath
 bdinfocli_path = $bdinfocli_path
-PATH = $PATH${normal}" ; }
+PATH = $PATH${normal}\n" ; }
 
 
 
