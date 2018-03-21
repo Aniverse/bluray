@@ -10,7 +10,7 @@
 Dedicated Server or VPS  
 ```
 wget -qO /usr/local/bin/bluray https://github.com/Aniverse/bluray/raw/master/bluray
-chmod +x bluray
+chmod +x /usr/local/bin/bluray
 ```
 
 Shared Seedbox with SSH access  
@@ -36,6 +36,7 @@ echo "PATH=~/bluray:$PATH" >> ~/.bashrc ; PATH=~/bluray:$PATH
 
 - **判断是 BDISO 还是 BDMV**  
 输入一个**完整的路径**，若该路径是文件夹且内含名为 BDMV 的文件夹的话则认为该资源是 BDMV  
+若该路径是文件夹且内含 ISO 文件，先挂载那个文件（多个 ISO 的情况下只选择其中一个）判断是不是 BDISO  
 文件扩展名是 ISO、且挂载后目录里有 BDMV 文件夹存在的，则认为是 BDISO  
 如果输入的文件名中出现了 HEVC、2160p、UHD 之类的字眼，则认为是 UHD Blu-ray，会提示不支持，要求重新输入  
 
