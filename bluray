@@ -191,7 +191,7 @@ function _askpath() {
 BDdetect=0
 while [ $BDdetect = 0 ]; do
 #   echo ; read -ep "${yellow}${bold}Input full path to your Blu-ray Disk: ${jiacu}${underline}" pathtostuff ; echo -n "${reset_underline}"
-    echo ; echo -e "${yellow}${bold}Input path to your stuff: ${jiacu}${underline}" ; read -e pathtostuff ; echo -n "${reset_underline}"
+    echo ; echo -e "${yellow}${bold}Input path to your stuff: ${normal}${underline}" ; read -e pathtostuff ; echo -n "${reset_underline}"
     if [[ ` ls "$pathtostuff" 2>/dev/null ` ]]; then
         FileExists=1 ; _stufftype
     else
@@ -219,7 +219,7 @@ if [[ ! $UHDBD == 1 ]] && [[ -d "${pathtostuff}" ]]; then
 #   只选择其中 find 命令结果中排名第一的 ISO，若还有其他 ISO 则会被无视
     elif [[ `  ls "${pathtostuff}" | grep -E '.[Ii][Ss][Oo]\>'  ` ]]; then
        pathtostuff=` find "$pathtostuff" -name "*.[Ii][Ss][Oo]" | head -n1 `
-       echo -e "\n${yellow}${bold}Find an ISO file which is ${underline}${pathtostuff}${reset_underline}${normal}"
+       echo -e "\n${yellow}${bold}Find an ISO file which is ${normal}\n${underline}${pathtostuff}${reset_underline}${normal}"
        _iso_check
 #   所输入的文件夹目录下即不存在 BDMV 文件夹也不存在 ISO 文件
     else
@@ -469,8 +469,12 @@ elif [[ $newtorrent == Yes8 ]]; then
     ANNOUNCE="-a udp://tracker.coppersurfer.tk:6969/announce -a http://open.kickasstracker.com:80/announce -a http://bt.dl1234.com:80/announce  -a udp://tracker.safe.moe:6969/announce -a udp://9.rarbg.to:2710/announce -a udp://tracker.piratepublic.com:1337/announce -a http://tracker.opentrackr.org:1337/announce -a http://retracker.telecom.by:80/announce -a https://open.acgnxtracker.com:443/announce -a udp://tracker.xku.tv:6969/announce -a udp://thetracker.org:80/announce -a udp://bt.xxx-tracker.com:2710/announce -a http://0d.kebhana.mx:443/announce -a http://share.camoe.cn:8080/announce -a udp://inferno.demonoid.pw:3418/announce -a udp://tracker.cypherpunks.ru:6969/announce"
 fi ; echo ; }
 
+
+
 # 询问要用的 Tracker URL
 function _input_announce() { echo "${yellow}${bold}" ; read -e -p "Input your tracker announce: ${normal}${blue}" TRACKERA ; echo "${normal}" ; ANNOUNCE="-a $TRACKERA" ; }
+
+
 
 # 询问制作种子时是否要暂时移除 BD 文件夹里的非必要文件
 function _askuselessfiles() {
