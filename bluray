@@ -33,8 +33,8 @@ baihuangse=${white}${on_yellow}; bailanse=${white}${on_blue}; bailvse=${white}${
 baiqingse=${white}${on_cyan}; baihongse=${white}${on_red}; baizise=${white}${on_magenta}; jiacu=${normal}${bold}
 heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis); guangbiao=$(tput cnorm)
 # --------------------------------------------------------------------------------
-BDDATE=2018.05.03
-BDVER=2.6.1
+BDDATE=2018.07.29
+BDVER=2.6.2
 DeBUG=0
 # --------------------------------------------------------------------------------
 bdinfocli_path="/etc/inexistence/02.Tools/bdinfocli.exe"
@@ -567,7 +567,7 @@ function _askuselessfiles() {
 
 echo "${bold}Some non-essential files are inclueded in Blu-ray, such as ${red}${BDUSELESS}${normal}${bold}"
 [[ "${stufftype}" == "BDISO" ]] && echo -e "For BDISO, as it's mounted as read-only file system, it will take some time to copy files"
-echo -n "${yellow}Would you like to remove these files temporarily when creating new torrents? ${normal}[Y/${cyan}n${normal}]" ; read responce
+echo -n "${yellow}Would you like to remove these files temporarily when creating new torrents? ${normal}[y/${cyan}N${normal}] " ; read responce
 
 case $responce in
     [yY] | [yY][Ee][Ss] )  movefile=Yes ;;
