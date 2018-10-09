@@ -3,6 +3,11 @@
 # Author: Aniverse
 # https://github.com/Aniverse/bluray
 #
+# nano $(which bluray)
+# --------------------------------------------------------------------------------
+BDDATE=2018.10.09
+BDVER=2.6.4.UHD
+DeBUG=1
 # --------------------------------------------------------------------------------
 # 如果你要自定义脚本生成的文件（种子、截图、BDinfo 等）的输出路径
 # 请把 CustomedOutput 改成 1，然后 OUTPUT 写上你想要的路径
@@ -41,10 +46,6 @@ reset_standout=$(tput rmso); normal=$(tput sgr0); alert=${white}${on_red}; title
 baihuangse=${white}${on_yellow}; bailanse=${white}${on_blue}; bailvse=${white}${on_green};
 baiqingse=${white}${on_cyan}; baihongse=${white}${on_red}; baizise=${white}${on_magenta}; jiacu=${normal}${bold}
 heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis); guangbiao=$(tput cnorm)
-# --------------------------------------------------------------------------------
-BDDATE=2018.10.09
-BDVER=2.6.3.UHD
-DeBUG=0
 # --------------------------------------------------------------------------------
 bdinfocli_path="/etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe"
 # --------------------------------------------------------------------------------
@@ -157,7 +158,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 if [[ ! `ls "${DIR}" | grep -E "mono.net-4.0"` ]] && [[ `command -v git` ]]; then
     echo -e "\n${bold}Git found, cloning library ...\n"
     cd "${DIR}" ; rm -rf bluray-2*
-    [[ $DeBUG == 1 ]] && echo -e "\n${DIR}\n" && ls
+    [[ $DeBUG == 1 ]] && echo -e "\nDIR = ${DIR}\n" && ls
     git clone --depth=1 https://github.com/Aniverse/bluray bluray-$BDVER
     [[ ! $? -eq 0 ]] && echo "Failed to git clone repo ..."
     rm -rf bluray-$BDVER/{bluray,README.md}
@@ -166,7 +167,7 @@ if [[ ! `ls "${DIR}" | grep -E "mono.net-4.0"` ]] && [[ `command -v git` ]]; the
 elif [[ ! `ls "${DIR}" | grep -E "mono.net-4.0"` ]] && [[ ! `command -v git` ]]; then
     echo "\n${bold}Git not found, downloading library via wget ...\n"
     cd "${DIR}"
-    [[ $DeBUG == 1 ]] && echo -e "\n${DIR}\n" && ls
+    [[ $DeBUG == 1 ]] && echo -e "\nDIR = ${DIR}\n" && ls
     BDVER=2.7.0
     wget --no-check-certificate -O $BDVER.tar.gz https://github.com/Aniverse/bluray/archive/$BDVER.tar.gz
     tar zxf $BDVER.tar.gz
@@ -272,7 +273,7 @@ if [[ ` ls "$pathtostuff" 2>/dev/null ` ]]; then
 else
     FileExists=0 ; echo -e "\n${bold}${red}ERROR${jiacu} This file or dictionary doesn't exist, or it's empty${normal}" ; unset pathtostuff
 fi
-[[ $DeBUG == 1 ]] && echo -e "\n${bold}${blue}FileExists=$FileExists\n${cyan}$pathtostuff${normal}\n" ; }
+[[ $DeBUG == 1 ]] && echo -e "\n\n${bold}${blue}FileExists = $FileExists\n${normal}${bold}${cyan}pathtostuff = $pathtostuff${normal}\n" ; }
 
 
 
@@ -327,7 +328,14 @@ fi ; }
 function _iso_check() {
 mkdir -p /mnt/mountbluraydisk
 mount -o loop "$pathtostuff" /mnt/mountbluraydisk > /dev/null 2>&1
-[[ $DeBUG == 1 ]] && echo -e "\n$pathtostuff\n" && df -lh && echo && ls /mnt/mountbluraydisk
+
+# [[ $DeBUG == 1 ]] && echo -e "\n$pathtostuff\n" && df -lh && echo && ls /mnt/mountbluraydisk
+
+[[ $DeBUG == 1 ]] && { echo -e "${bold}pathtostuff: ${blue}${underline}${pathtostuff}${reset_underline}${normal}"
+echo -e "\n${bold}The followings are current file system disk${normal}${blue}" ; df -lh
+echo -e "${normal}\n${bold}The followings are files in mounted folder ${normal}${blue}"
+ls /mnt/mountbluraydisk ; echo -e "${normal}" ; }
+
 if [[ `ls /mnt/mountbluraydisk | grep BDMV` ]]; then
     stufftype=BDISO ; BDdetect=1 ; opt_path=2
     echo -ne "\n${bold}${magenta}BDISO${jiacu} detected ... ${normal}"
@@ -336,6 +344,7 @@ elif [[ `ls /mnt/mountbluraydisk | grep VIDEO_TS` ]]; then
 else
     echo -e "\n${bold}${red}ERROR${jiacu} This is not a valid BDISO or you do not have root privileges to mount it${normal}" ; unset pathtostuff
 fi
+
 umount /mnt/mountbluraydisk > /dev/null 2>&1 ; }
 
 
@@ -391,9 +400,15 @@ elif [[ $CustomedOutput == 0 ]] && [[ $NoRoot == 0 ]]; then
     outputpath="/etc/inexistence/04.Upload/$file_title_clean"
 fi
 
-[[ $DeBUG == 1 ]] && { echo -e "\n${bold}Output path sets to ${outputpath}${normal}" ; echo -e "\n$bdpath\n" ; df -lh ; echo ; ls "$bdpath" ; }
+[[ $DeBUG == 1 ]] && { echo -e "\n${bold}Output path sets to ${blue}${underline}${outputpath}${reset_underline}${normal}"
+echo -e "${bold}BDMV path sets to ${blue}${underline}${bdpath}${reset_underline}${normal}"
+echo -e "${bold}This is the main m2ts file: ${blue}${underline}${main_m2ts_path}${reset_underline}${normal}"
+echo -e "${bold}This is the duration of main m2ts file: ${blue}${underline}${duration1}${reset_underline}${normal}"
+echo -e "\n${bold}The followings are current file system disk${normal}${blue}" ; df -lh
+echo -e "${normal}\n${bold}The followings are files in BDMV path ${normal}${blue}"
+ls "$bdpath" ; }
 
-echo ; }
+echo -e "${normal}" ; }
 
 
 
@@ -447,7 +462,7 @@ while [[ $resolution = "" ]]; do
 
     [[   $UHDBD == 1 ]] && echo -e "${bold}${red}ATTENTION${jiacu} For now there are some issues when taking screenshots of UHD Blu-ray${normal}"
 
-    echo -ne "${yellow}${bold}Which resolution of the screenshots do you want?${normal} (Default: ${cyan}03${normal})"; read response
+    echo -ne "${yellow}${bold}Which resolution of the screenshots do you want?${normal} (Default: ${cyan}04${normal}) "; read response
 
     case $response in
         01 | 1 ) resolution=1080p ;;
