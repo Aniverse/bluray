@@ -6,20 +6,29 @@
 # --------------------------------------------------------------------------------
 # 如果你要自定义脚本生成的文件（种子、截图、BDinfo 等）的输出路径
 # 请把 CustomedOutput 改成 1，然后 OUTPUT 写上你想要的路径
+#
+# You are able to assing a specific folder for output files (bdinfo,screenshots etc.) by editing the following line
+# Jusr set CustomedOutput=1 and change the OUTPUT path
+#
 CustomedOutput=0
 OUTPUT="/replace/here/with/your/output/path"
 # --------------------------------------------------------------------------------
 # 如果你用的是没有 root 权限的盒子，对每次都询问是否使用内置软件库感到厌烦的话，
 # 可以把 NoInstall 改为 1，这样脚本每次都会自动使用脚本的软件库去运行
+#
+# You could set NoInstall=1 on shared seedbox without root privilege, so there will be no more question asking if you would like to use built-in library
+#
 NoInstall=0
 # --------------------------------------------------------------------------------
 # 使用 rar 打包文件，最后给出下载链接（需要开启 http 下载以及安装了 rar）
+# 以下预设主要针对使用了 inexistence 脚本的用户，其他用户请根据实际情况修改
+#
 BATCH=0
 DOWNLOAD_LINK_BASE="https://$( wget --no-check-certificate -t1 -T6 -qO- v4.ipv6-test.com/api/myip.php )/h5ai/inexistence/04.Upload"
 WEB_FOLDER="/etc/inexistence/04.Upload"
 # --------------------------------------------------------------------------------
-# 如果你要用 rclone 自动上传文件，请把 RCLONE 改成 1，然后 RCLONEPATH 改成你 rclone remote 的路径
-# 请确保 rclone 命令可用
+# 如果你要用 rclone 自动上传文件，请把 RCLONE 改成 1，然后 RCLONEPATH 改成你 rclone remote 的路径（请确保 rclone 命令可用）
+#
 RCLONE=0
 RCLONEPATH="Replace:/here/with/your/remote/path"
 # --------------------------------------------------------------------------------
@@ -33,11 +42,11 @@ baihuangse=${white}${on_yellow}; bailanse=${white}${on_blue}; bailvse=${white}${
 baiqingse=${white}${on_cyan}; baihongse=${white}${on_red}; baizise=${white}${on_magenta}; jiacu=${normal}${bold}
 heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis); guangbiao=$(tput cnorm)
 # --------------------------------------------------------------------------------
-BDDATE=2018.07.29
-BDVER=2.6.2
+BDDATE=2018.10.09
+BDVER=2.6.3.UHD
 DeBUG=0
 # --------------------------------------------------------------------------------
-bdinfocli_path="/etc/inexistence/02.Tools/bdinfocli.exe"
+bdinfocli_path="/etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe"
 # --------------------------------------------------------------------------------
 
 # 获取参数
@@ -66,6 +75,7 @@ if [[ $fenbianlv ]]; then
     [[ $fenbianlv == auto   ]] &&   resolution=auto
     [[ $fenbianlv == autoar ]] &&   resolution=autoar
     [[ $fenbianlv == 1080p  ]] && { resolution=1080p ; fenbianlv=1920x1080 ;  }
+    [[ $fenbianlv == 2160p  ]] && { resolution=2160p ; fenbianlv=3840x2160 ;  }
     [[ ! $resolution ]]        &&   resolution=input_opt
 fi
 
@@ -111,6 +121,14 @@ function _check_install_2(){ for apps in ffmpeg vcs mono mktorrent convert monta
 
 # 有 root 权限的盒子安装 ffmpeg
 function _install_ffmpeg(){
+cd ; wget --no-check-certificate -qO ffmpeg-4.0.2-64bit-static.tar.xz https://github.com/Aniverse/BitTorrentClientCollection/raw/master/Other%20Tools/ffmpeg-4.0.2-64bit-static.tar.xz
+tar xf ffmpeg-4.0.2-64bit-static.tar.xz
+rm -rf ffmpeg-*bit-static/{manpages,presets,model,readme.txt,GPLv3.txt}
+cp -f ffmpeg-*-64bit-static/* /usr/bin
+chmod 755 /usr/bin/{ffmpeg,ffprobe,ffmpeg-10bit,qt-faststart}
+rm -rf ffmpeg-*-64bit-static* ; }
+
+function _install_ffmpeg_2(){
 if [[ `cat /etc/os-release | grep "(" | cut -d '(' -f2 | cut -d ')' -f1 | head -n1 | awk '{print $1}' | tr '[A-Z]' '[a-z]'` == jessie ]]; then
 grep "deb http://www.deb-multimedia.org jessie main" /etc/apt/sources.list >> /dev/null || echo "deb http://www.deb-multimedia.org jessie main" >> /etc/apt/sources.list
 apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 5C808C2B65558117
@@ -127,8 +145,10 @@ function _install_vcs() { wget --no-check-certificate -qO /usr/local/bin/vcs htt
 function _install_bdinfo() {
 if [[ ! $bdinfocli_path ]]; then
 mkdir -p /etc/inexistence/02.Tools
-wget --no-check-certificate -qO /etc/inexistence/02.Tools/bdinfocli.exe https://raw.githubusercontent.com/Aniverse/inexistence/master/02.Tools/bdinfocli.exe
-chmod 755 /etc/inexistence/02.Tools/bdinfocli.exe ; fi ; }
+cd /etc/inexistence/02.Tools
+# svn co https://github.com/Aniverse/bluray/trunk/tools/BDinfoCli
+wget -q https://github.com/Aniverse/BitTorrentClientCollection/raw/master/BDTools/BDinfoCli.0.7.5.tar.gz && tar zxf BDinfoCli.0.7.5.tar.gz && rm -f BDinfoCli.0.7.5.tar.gz
+chmod 755 /etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe ; fi ; }
 
 
 # 检查内置库是否存在、指定路径
@@ -136,7 +156,7 @@ function _check_library() {
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 if [[ ! `ls "${DIR}" | grep -E "mono.net-4.0"` ]] && [[ `command -v git` ]]; then
     echo -e "\n${bold}Git found, cloning library ...\n"
-    cd "${DIR}" ; rm -rf bluray-$BDVER
+    cd "${DIR}" ; rm -rf bluray-2*
     [[ $DeBUG == 1 ]] && echo -e "\n${DIR}\n" && ls
     git clone --depth=1 https://github.com/Aniverse/bluray bluray-$BDVER
     [[ ! $? -eq 0 ]] && echo "Failed to git clone repo ..."
@@ -147,7 +167,7 @@ elif [[ ! `ls "${DIR}" | grep -E "mono.net-4.0"` ]] && [[ ! `command -v git` ]];
     echo "\n${bold}Git not found, downloading library via wget ...\n"
     cd "${DIR}"
     [[ $DeBUG == 1 ]] && echo -e "\n${DIR}\n" && ls
-    BDVER=2.0.8
+    BDVER=2.7.0
     wget --no-check-certificate -O $BDVER.tar.gz https://github.com/Aniverse/bluray/archive/$BDVER.tar.gz
     tar zxf $BDVER.tar.gz
     rm -rf bluray-$BDVER/{bluray,README.md}
@@ -159,7 +179,8 @@ fi
 chmod -R 755 "${DIR}/tools"
 export PATH="$DIR":"$DIR"/tools:$PATH
 export MONO_PATH="$DIR"/mono.net-4.0
-bdinfocli_path="$DIR"/tools/bdinfocli.exe ; }
+# bdinfocli_path="$DIR"/tools/bdinfocli.exe
+bdinfocli_path="$DIR"/tools/BDinfoCli/BDInfo.exe ; }
 # --------------------------------------------------------------------------------
 
 
@@ -189,13 +210,9 @@ while [[ $appmissing == Yes ]]; do
 
     installdone=0
 
-
-
     while [[ $installdone = 0 ]]; do
 
         installresponce=0
-
-
 
         while [[ $installresponce = 0 ]]; do
             installresponce=1
@@ -223,8 +240,6 @@ while [[ $appmissing == Yes ]]; do
         esac
 
     done
-
-
 
 done
 
@@ -261,16 +276,23 @@ fi
 
 
 
-# 检查是不是 BDMV 或者 BDISO，是不是 UHD BD
+# 检查是不是 BDMV 或者 BDISO
 function _stufftype() {
 
 BDname=` basename "$pathtostuff" `
-UHDBD=0 ; [[ ` echo "${BDname}" | grep -E "[He][Ee][Vv][Cc]" ` ]] && echo -e "\n${bold}${red}ERROR${jiacu} It seems this is a UHD Blu-ray, which is not supported${normal}" && UHDBD=1
-[[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "2160[Pp]" ` ]] && echo -e "\n${bold}${red}ERROR${jiacu} It seems this is a UHD Blu-ray, which is not supported${normal}" && UHDBD=1
-[[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "\b[Uu][Hh][Dd]\b" ` ]] && echo -e "\n${bold}${red}ERROR${jiacu} It seems this is a UHD Blu-ray, which is not supported${normal}" && UHDBD=1
-[[   $UHDBD == 1 ]] && unset pathtostuff
 
-if [[ ! $UHDBD == 1 ]] && [[ -d "${pathtostuff}" ]]; then
+# UHDBD=0 ; [[ ` echo "${BDname}" | grep -E "[He][Ee][Vv][Cc]" ` ]] && echo -e "\n${bold}${red}ERROR${jiacu} It seems this is a UHD Blu-ray, which is not supported${normal}" && UHDBD=1
+# [[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "2160[Pp]" ` ]] && echo -e "\n${bold}${red}ERROR${jiacu} It seems this is a UHD Blu-ray, which is not supported${normal}" && UHDBD=1
+# [[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "\b[Uu][Hh][Dd]\b" ` ]] && echo -e "\n${bold}${red}ERROR${jiacu} It seems this is a UHD Blu-ray, which is not supported${normal}" && UHDBD=1
+# [[   $UHDBD == 1 ]] && unset pathtostuff
+
+UHDBD=0              ; [[ ` echo "${BDname}" | grep -E "[He][Ee][Vv][Cc]" ` ]] && UHDBD=1
+[[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "2160[Pp]" ` ]]         && UHDBD=1
+[[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "\b[Uu][Hh][Dd]\b" ` ]] && UHDBD=1
+
+# if [[ ! $UHDBD == 1 ]] && [[ -d "${pathtostuff}" ]]; then
+if [[ -d "${pathtostuff}" ]]; then
+
 #   文件夹路径下包含名为 BDMV 的文件，认为是 BDMV
     if [[ ` ls "${pathtostuff}" | grep BDMV ` ]]; then
         stufftype=BDMV ; BDdetect=1 ; opt_path=2
@@ -285,7 +307,10 @@ if [[ ! $UHDBD == 1 ]] && [[ -d "${pathtostuff}" ]]; then
     else
         echo -e "\n${bold}${red}ERROR${jiacu} This folder does not contain BDMV or BDISO${normal}" ; unset pathtostuff
     fi
-elif [[ ! $UHDBD == 1 ]] && [[ ! -d "${pathtostuff}" ]]; then
+
+# elif [[ ! $UHDBD == 1 ]] && [[ ! -d "${pathtostuff}" ]]; then
+elif [[ ! -d "${pathtostuff}" ]]; then
+
     ifBDISO="${pathtostuff##*.}"
 #   文件扩展名为 ISO
     if [[ `echo "${ifBDISO}" | grep -E [Ii][Ss][Oo]` = [Ii][Ss][Oo] ]]; then
@@ -414,18 +439,23 @@ function _askresolution() {
 while [[ $resolution = "" ]]; do
 
     echo -e "01) ${cyan}1920x1080${normal}"
-    echo -e "02) ${cyan}Auto detect${normal}"
-    echo -e "03) ${cyan}Auto detect with DAR${normal}"
-    echo -e "04) ${cyan}Input a specific resolution${normal}"
-    echo -e "05) ${cyan}Do not take screenshots${normal}"
+    echo -e "02) ${cyan}3840x2160${normal}"
+    echo -e "03) ${cyan}Auto detect${normal}"
+    echo -e "04) ${cyan}Auto detect with DAR${normal}"
+    echo -e "05) ${cyan}Input a specific resolution${normal}"
+    echo -e "06) ${cyan}Do not take screenshots${normal}"
+
+    [[   $UHDBD == 1 ]] && echo -e "${bold}${red}ATTENTION${jiacu} For now there are some issues when taking screenshots of UHD Blu-ray${normal}"
+
     echo -ne "${yellow}${bold}Which resolution of the screenshots do you want?${normal} (Default: ${cyan}03${normal})"; read response
 
     case $response in
         01 | 1 ) resolution=1080p ;;
-        02 | 2 ) resolution=auto ;;
-        03 | 3 ) resolution=autoar && echo ;;
-        04 | 4 ) resolution=input ;;
-        05 | 5 ) resolution=no ;;
+        02 | 2 ) resolution=2160p ;;
+        03 | 3 ) resolution=auto ;;
+        04 | 4 ) resolution=autoar && echo ;;
+        05 | 5 ) resolution=input ;;
+        06 | 6 ) resolution=no ;;
         "" | * ) resolution=autoar ;;
     esac
 
@@ -456,8 +486,10 @@ if [[ $resolution == autoar ]]; then
     esac
 fi ; fi
 
-if [[ $resolution == 1080p ]]; then
+if   [[ $resolution == 1080p ]]; then
     echo -e "${bold}The script will take 10 screenshots in ${green}1920×1080${normal}"
+elif [[ $resolution == 2160p ]]; then
+    echo -e "${bold}The script will take 10 screenshots in ${green}3840x2160${normal}"
 elif [[ $resolution == auto ]]; then
     echo -e "${bold}The script will take 10 screenshots in ${green}original${jiacu} resolution${normal}"
 elif [[ $resolution == input ]]; then
@@ -491,6 +523,7 @@ done
 
 [[ $sstn == Yes ]] && echo -e "${bold}The script will generate a ${cyan}thumbnail${normal}"
 [[ $sstn == No  ]] && echo -e "${bold}${red}The script will not generate a thumbnail${normal}"
+
 echo ; }
 
 
@@ -637,7 +670,8 @@ PATH = $PATH${normal}\n" ; }
 # 获取BD info
 function _getinfo() {
 
-[[ $bdscan == auto   ]] && echo -ne '1\n' | mono "${bdinfocli_path}" "${bdpath}" "${outputpath}"
+# [[ $bdscan == auto   ]] && echo -ne '1\n' | mono "${bdinfocli_path}" "${bdpath}" "${outputpath}"
+[[ $bdscan == auto   ]] && echo -ne '1\nq\n' | mono "${bdinfocli_path}" "${bdpath}" "${outputpath}"
 [[ $bdscan == manual ]] && mono "${bdinfocli_path}" "${bdpath}" "${outputpath}"
 
 if [[ ! $bdscan == no ]]; then
@@ -675,6 +709,7 @@ fi
 
 # png 截图
 [[ $resolution == 1080p ]] && fenbianlv=1920x1080
+[[ $resolution == 2160p ]] && fenbianlv=3840x2160
 
 for c in {01..10} ; do
 
