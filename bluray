@@ -3,12 +3,13 @@
 # Author: Aniverse
 # https://github.com/Aniverse/bluray
 #
+# wget -qO /usr/local/bin/bluray https://raw.githubusercontent.com/Aniverse/bluray/master/bluray && chmod +x /usr/local/bin/bluray && grep BDVER= `which bluray` | head -n1 | grep -Eo [0-9.]+
 # --------------------------------------------------------------------------------
 # nano $(which bluray)
 BDDATE=2018.10.10
-BDVER=2.6.8_UHD
+BDVER=2.6.9_UHD
 DeBUG=0
-# sed -i "s/DeBUG=*/DeBUG=1/" $(which bluray)
+# sed -i "s/DeBUG=0/DeBUG=1/" $(which bluray)
 # --------------------------------------------------------------------------------
 # 如果你要自定义脚本生成的文件（种子、截图、BDinfo 等）的输出路径
 # 请把 CustomedOutput 改成 1，然后 OUTPUT 写上你想要的路径
@@ -260,6 +261,8 @@ function _askpath() {
 BDdetect=0
 [[ $opt_path == 1 ]] && { echo -e "\n${bold}Read Blu-ray from:\n${blue}$pathtostuff${normal}" ; _stuff_check_existence ; }
 
+# NoRoot=0 && _umount_all_disk
+
 while [[ $pathtostuff == "" ]]; do
 #   echo ; read -ep "${yellow}${bold}Input full path to your Blu-ray Disk: ${jiacu}${underline}" pathtostuff ; echo -n "${reset_underline}"
     echo ; echo -e "${yellow}${bold}Input path to your stuff: ${normal}${underline}" ; read -e pathtostuff ; echo -n "${reset_underline}"
@@ -268,6 +271,21 @@ done ; }
 
 
 
+# 先全部解除挂载（其实没必要）
+function _umount_all_disk() {
+disknumber=` df -lh | grep -c "/dev/loop" `
+if [[ ! $disknumber == 0 ]]; then
+  # echo -e "\n${bold}You're now mounting ${green}${disknumber}${normal}${bold} disks,the script will unmount all of them ${normal}\n"
+    for disk in ` df -lh | grep -Eo "/dev/loop[0-9]+" ` ; do
+        ppaatthh=$(basename `df -lh | grep -E "${disk}\>" | awk '{print $6}' `)
+        umount ${disk} # && echo "${cyan}${ppaatthh}${normal} has been unmounted"
+    done
+  # echo -e "\n${bold}All ${green}${disknumber}${normal}${bold} disks had been unmounted${normal}\n"
+fi ; }
+
+
+
+# 检查文件是否存在
 function _stuff_check_existence() {
 if [[ ` ls "$pathtostuff" 2>/dev/null ` ]]; then
     FileExists=1 ; _stufftype
@@ -318,19 +336,17 @@ elif [[ ! -d "${pathtostuff}" ]]; then
     if [[ `echo "${ifBDISO}" | grep -E [Ii][Ss][Oo]` = [Ii][Ss][Oo] ]]; then
         _iso_check
     else
-       #echo -e "\n${bold}${red}ERROR${jiacu} This is a ${underline}${ifBDISO}${reset_underline} file, not BDISO${normal}"
+      # echo -e "\n${bold}${red}ERROR${jiacu} This is a ${underline}${ifBDISO}${reset_underline} file, not BDISO${normal}"
         echo -e "\n${bold}${red}ERROR${jiacu} This is not an ${underline}ISO${reset_underline} file${normal}" ; unset pathtostuff
     fi
 fi ; }
 
 
 
-# 检查 ISO 是不是可用的 BDISO（这个功能可能会引发 bug：明明确实是原盘但却无法识别出来，原因不明，故暂时搁置，不做处理）
+# 检查 ISO 是不是可用的 BDISO #####（这个功能可能会引发 bug：明明确实是原盘但却无法识别出来，原因不明，故暂时搁置，不做处理）
 function _iso_check() {
 mkdir -p /mnt/mountbluraydisk
 mount -o loop "$pathtostuff" /mnt/mountbluraydisk > /dev/null 2>&1
-
-# [[ $DeBUG == 1 ]] && echo -e "\n$pathtostuff\n" && df -lh && echo && ls /mnt/mountbluraydisk
 
 
 [[ $DeBUG == 1 ]] && {
@@ -352,6 +368,15 @@ else
 fi
 
 umount /mnt/mountbluraydisk > /dev/null 2>&1 ; }
+
+
+
+# 这里还没做好。其实如果已经挂载了的话，直接用之前挂载的不就好了？不过这样子要改的东西有点多……
+# 注意 already mounted 和 busy 是同时可能存在的情况，其实可能是没挂载上去的
+function _mount_check() {
+mount -o loop "$pathtostuff" /mnt/mountbluraydisk > /tmp/mount.check.log 2>&1
+[[ `grep "already mounted" /tmp/mount.check.log` ]] && {
+echo -e "\n${bold}You're now mounting this blu-ray disk, the script will unmount it for futher detection ${normal}\n" ; } ; }
 
 
 
