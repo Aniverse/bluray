@@ -3,12 +3,12 @@
 # Author: Aniverse
 # https://github.com/Aniverse/bluray
 #
-# nano $(which bluray)
-# sed -i "s/DeBUG=*/DeBUG=1/" $(which bluray)
 # --------------------------------------------------------------------------------
-BDDATE=2018.10.09
-BDVER=2.6.7_UHD_Dev
+# nano $(which bluray)
+BDDATE=2018.10.10
+BDVER=2.6.8_UHD
 DeBUG=0
+# sed -i "s/DeBUG=*/DeBUG=1/" $(which bluray)
 # --------------------------------------------------------------------------------
 # 如果你要自定义脚本生成的文件（种子、截图、BDinfo 等）的输出路径
 # 请把 CustomedOutput 改成 1，然后 OUTPUT 写上你想要的路径
@@ -348,7 +348,7 @@ if [[ `ls /mnt/mountbluraydisk | grep BDMV` ]]; then
 elif [[ `ls /mnt/mountbluraydisk | grep VIDEO_TS` ]]; then
     echo -e "\n${bold}${red}ERROR${jiacu} This is a DVDISO, not BDISO${normal}" ; unset pathtostuff
 else
-    echo -e "\n${bold}${red}ERROR${jiacu} This is not a valid BDISO or you do not have root privileges to mount it${normal}" ; unset pathtostuff
+    echo -e "\n${bold}${red}ERROR${jiacu} This is not a valid BDISO or you are not able to mount it${normal}" ; unset pathtostuff
 fi
 
 umount /mnt/mountbluraydisk > /dev/null 2>&1 ; }
