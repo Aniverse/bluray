@@ -6,7 +6,7 @@
 # --------------------------------------------------------------------------------
 # nano $(which bluray)
 BDDATE=2018.10.10
-BDVER=2.7.1
+BDVER=2.7.2
 DeBUG=0
 # sed -i "s/DeBUG=0/DeBUG=1/" $(which bluray)
 # --------------------------------------------------------------------------------
@@ -873,7 +873,7 @@ echo ; ls -hAlvZ "${outputpath}" | grep -v total | awk '{print $NF}' | pr -4 -t 
 
 [[ $copy_bdiso_to_bdmv == 1 ]] && echo -e "${bold}BDISO copied to ${yellow}\"${bdpath}\"${normal}\n"
 
-[[ $BATCH == 1 ]] && echo -e "${bold}Download batch via this link: ${green}${DOWNLOAD_LINK_BASE}/${file_title_short}.rar${normal}\n"
+[[ $BATCH == 1 ]] && echo -e "${bold}Download batch via the following link: \n${green}${DOWNLOAD_LINK_BASE}/${file_title_short}.rar${normal}\n"
 
 if [[ $timeused -gt 60 && $timeused -lt 3600 ]]; then
     timeusedmin=$(expr $timeused / 60) ; timeusedsec=$(expr $timeused % 60)
@@ -919,7 +919,7 @@ _askresolution
 _askthumbnail
 _askmktorrent
 [[ $USELESS == 1 ]] && _askuselessfiles
-[[ $rclone == 1 ]] && _askrclone
+[[ $RCLONE == 1 ]] && _askrclone
 
 [[ $DeBUG == 1 ]] && _debug
 _preparation
