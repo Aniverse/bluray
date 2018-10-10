@@ -2,7 +2,7 @@
 > Automatic Blu-ray Disk Upload Toolkit  
 > A Script used for scanning BDinfo and take screenshots for BDISO or BDMV on Linux  
 
-转发蓝光原盘（不支持 UHD）时可以使用的一个脚本  
+转发蓝光原盘时可以使用的一个脚本  
 支持对 BDISO 或 BDMV 进行如下操作：扫描 BDinfo、截图、生成缩略图、重新制作种子  
 
 ### Installation
@@ -13,7 +13,7 @@ wget -qO /usr/local/bin/bluray https://github.com/Aniverse/bluray/raw/master/blu
 chmod +x /usr/local/bin/bluray
 ```
 
-Shared Seedbox with SSH access  
+Shared seedbox with SSH access  
 ```
 cd ; git clone https://github.com/Aniverse/bluray
 echo "PATH=~/bluray:$PATH" >> ~/.bashrc ; PATH=~/bluray:$PATH
@@ -30,15 +30,12 @@ echo "PATH=~/bluray:$PATH" >> ~/.bashrc ; PATH=~/bluray:$PATH
 
 ![询问选项](https://github.com/Aniverse/filesss/raw/master/Images/2018.02.22.bluray.02.png)
 
-注意：路径里即使带空格也不需要双引号  
-
 目前可以实现以下功能：  
 
 - **判断是 BDISO 还是 BDMV**  
 输入一个**完整的路径**，若该路径是文件夹且内含名为 BDMV 的文件夹的话则认为该资源是 BDMV  
 若该路径是文件夹且内含 ISO 文件，先挂载那个文件（多个 ISO 的情况下只选择其中一个）判断是不是 BDISO  
 文件扩展名是 ISO、且挂载后目录里有 BDMV 文件夹存在的，则认为是 BDISO  
-如果输入的文件名中出现了 HEVC、2160p、UHD 之类的字眼，则认为是 UHD Blu-ray，会提示不支持，要求重新输入  
 
 - **自动挂载镜像**  
 本操作需要用 root 权限执行 mount 命令，如无 root 权限则无法使用  
@@ -49,12 +46,12 @@ echo "PATH=~/bluray:$PATH" >> ~/.bashrc ; PATH=~/bluray:$PATH
 - **截图**  
 自动寻找 BD 里体积最大的 m2ts 截 10 张 png 图，可以自定义截图分辨率  
 由于某些 BD 的实际显示分辨率和原始分辨率不一样，因此脚本对分辨率做了计算，默认使用 DAR 的分辨率  
+如果输入的文件名中出现了 HEVC、2160p、UHD 之类的字眼，则认为是 UHD Blu-ray，会提示截图可能出现问题  
 
 - **扫描 BDinfo**  
-BDinfo 采用 mono + bdinfocli 来实现。由于 bdinfocli 年久失修，对于 TrueHD Atmos 和 DTS:X 音轨无法较好地支持  
+BDinfo 采用 mono + bdinfocli 0.7.5 来实现  
 默认是自动扫描第一个最长的 mpls；也可以手动选择扫描哪一个 mpls  
-BDinfo 会输出三个报告，一个是原版的，一个是 Main Summary，一个是 Quick Summary  
-一般而言发种写个 Quick Summary 就差不多了  
+BDinfo 会输出三个报告，Full report、 Main Summary、Quick Summary  
 
 - **生成缩略图**  
 这个功能默认不启用；其实一般也不太用得上  
@@ -86,25 +83,6 @@ BDinfo 会输出三个报告，一个是原版的，一个是 Main Summary，一
 ![h5ai](https://github.com/Aniverse/filesss/raw/master/Images/2018.02.22.bluray.05.png)
 
 安装了 `h5ai` 的话可以在网页上预览、下载生成的截图、BDinfo、种子  
-
-
-
-### Known Issues
-
-- **有时候输入正确的路径反应却不对**  
-暂无解决办法，我还不知道这是由于什么原因导致的  
-
-### To Do List
-
-
-
-### Under Consideration
-
-- **判断操作是否成功**  
-目前操作中哪一步翻车了也不会有翻车了的提醒  
-
-- **自动上传到 ptpimg**  
-调用 ptpimg_uploader 来完成，脚本跑完后会输出 ptpimg 的链接。运行之前你需要自己配置好 ptpimg_uploader  
 
   -------------------
 ### Screenshots
