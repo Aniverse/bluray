@@ -3,11 +3,10 @@
 # Author: Aniverse
 # https://github.com/Aniverse/bluray
 #
-# wget -qO /usr/local/bin/bluray https://raw.githubusercontent.com/Aniverse/bluray/master/bluray && chmod +x /usr/local/bin/bluray && grep BDVER= `which bluray` | head -n1 | grep -Eo [0-9.]+
 # --------------------------------------------------------------------------------
 # nano $(which bluray)
 BDDATE=2018.10.10
-BDVER=2.6.9_UHD
+BDVER=2.7.0
 DeBUG=0
 # sed -i "s/DeBUG=0/DeBUG=1/" $(which bluray)
 # --------------------------------------------------------------------------------
@@ -856,6 +855,8 @@ function _rcloneup() { rclone copy -v --stats 5s "${outputpath}" "${RCLONEPATH}"
 function _end() {
 
 [[ $move_when_complete == 1 ]] && mv ` ls "/etc/inexistence/06.BluRay/temp/$file_title_clean" ` "$bdpath" && rm -rf "/etc/inexistence/06.BluRay/temp/$file_title_clean"
+
+# 不要解除挂载，解除挂载了等会儿怎么 seeding？
 # [[ $stufftype == "BDISO" ]] && umount "$bdisopath" # && rm -rf "/etc/inexistence/06.BluRay/$file_title_clean" "/etc/inexistence/06.BluRay/temp/$file_title_clean"
 
 file_title_short=` echo "${file_title_clean}" | cut -c1-40  `
@@ -864,19 +865,15 @@ file_title_short=` echo "${file_title_clean}" | cut -c1-40  `
 endtime=$(date +%s) 
 timeused=$(( $endtime - $starttime ))
 
-clear ; echo -e "${bold}Done. Files created in ${yellow}\"${outputpath}\"${normal}"
+clear ; echo -e "${bold}Done. Files are stored in ${yellow}\"${outputpath}\"${normal}"
+
+[[ ! $resolution == no ]] && [[ $UHDBD == 1 ]] && echo -e "\n${bold}${red}ATTENTION${jiacu} Some of screenshots may be ${red}broken${jiacu}, you need to check it manually"
 
 echo ; ls -hAlvZ "${outputpath}" | grep -v total | awk '{print $NF}' | pr -4 -t ; echo
 
-[[ $copy_bdiso_to_bdmv == 1 ]] && echo -e "${bold}BDISO copied to ${yellow}\"${bdpath}\"${normal}"
+[[ $copy_bdiso_to_bdmv == 1 ]] && echo -e "${bold}BDISO copied to ${yellow}\"${bdpath}\"${normal}\n"
 
-[[ $BATCH == 1 ]] && echo -e "${bold}Download batch via this link: ${green}${DOWNLOAD_LINK_BASE}/${file_title_short}.rar${normal}"
-
-if [[ ! $bdscan == no ]] ; then
-    echo -e "\n${bold}${blue}--------------------------------------------- BDinfo Main Summary ----------------------------------------------${normal}\n"
-    cat "${outputpath}/bdinfo.main.txt"
-    echo -e "\n${bold}${blue}------------------------------------ Just copy them, no need to download txt -----------------------------------${normal}"
-fi
+[[ $BATCH == 1 ]] && echo -e "${bold}Download batch via this link: ${green}${DOWNLOAD_LINK_BASE}/${file_title_short}.rar${normal}\n"
 
 if [[ $timeused -gt 60 && $timeused -lt 3600 ]]; then
     timeusedmin=$(expr $timeused / 60) ; timeusedsec=$(expr $timeused % 60)
@@ -888,7 +885,25 @@ else
    echo -e "\n${bold}${yellow}Time used: ${timeused} sec${normal}"
 fi
 
+if [[ ! $bdscan == no ]] ; then
+    echo -ne "\n${yellow}${bold}Would you like to show BDinfo summary in ssh?${normal} [${cyan}Y${normal}]es or [N]o " ; read responce
+    case $responce in
+        [yY] | [yY][Ee][Ss] )  showinfo=Yes ;;
+        [nN] | [nN][Oo]     )  showinfo=No  ;;
+        ""   | *            )  showinfo=Yes ;;
+    esac
+    if [[ $showinfo == Yes ]] ; then
+        echo -e "\n${bold}${blue}--------------------------------------------- BDinfo Main Summary ----------------------------------------------${normal}\n"
+        cat "${outputpath}/bdinfo.main.txt"
+        echo -e "\n${bold}${blue}--------------------------------------------------- BDinfo END -------------------------------------------------${normal}"
+    fi
+fi
+
 echo ; }
+
+
+
+
 
 
 
