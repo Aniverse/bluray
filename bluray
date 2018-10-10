@@ -6,7 +6,7 @@
 # --------------------------------------------------------------------------------
 # nano $(which bluray)
 BDDATE=2018.10.10
-BDVER=2.7.0
+BDVER=2.7.1
 DeBUG=0
 # sed -i "s/DeBUG=0/DeBUG=1/" $(which bluray)
 # --------------------------------------------------------------------------------
@@ -877,12 +877,12 @@ echo ; ls -hAlvZ "${outputpath}" | grep -v total | awk '{print $NF}' | pr -4 -t 
 
 if [[ $timeused -gt 60 && $timeused -lt 3600 ]]; then
     timeusedmin=$(expr $timeused / 60) ; timeusedsec=$(expr $timeused % 60)
-    echo -e "\n${bold}${yellow}Time used: ${timeusedmin} min ${timeusedsec} sec${normal}"
+    echo -e "${bold}${yellow}Time used: ${timeusedmin} min ${timeusedsec} sec${normal}"
 elif [[ $timeused -ge 3600 ]]; then
     timeusedhour=$(expr $timeused / 3600) ; timeusedmin=$(expr $(expr $timeused % 3600) / 60) ; timeusedsec=$(expr $timeused % 60)
-    echo -e "\n${bold}${yellow}Time used: ${timeusedhour} hour ${timeusedmin} min ${timeusedsec} sec${normal}"
+    echo -e "${bold}${yellow}Time used: ${timeusedhour} hour ${timeusedmin} min ${timeusedsec} sec${normal}"
 else
-   echo -e "\n${bold}${yellow}Time used: ${timeused} sec${normal}"
+   echo -e "${bold}${yellow}Time used: ${timeused} sec${normal}"
 fi
 
 if [[ ! $bdscan == no ]] ; then
