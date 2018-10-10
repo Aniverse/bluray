@@ -6,7 +6,7 @@
 # --------------------------------------------------------------------------------
 # nano $(which bluray)
 BDDATE=2018.10.10
-BDVER=2.7.2
+BDVER=2.7.3
 DeBUG=0
 # sed -i "s/DeBUG=0/DeBUG=1/" $(which bluray)
 # --------------------------------------------------------------------------------
@@ -691,11 +691,11 @@ echo ; }
 # 询问是否上传到其他地方
 function _askrclone() {
 
-echo -n "${yellow}${bold}Would you like to upload result files to some cloud drives via rclone?${normal} [${cyan}Y${normal}]es or [N]o "; read responce
+echo -n "${yellow}${bold}Would you like to upload generated files to cloud drive via rclone?${normal} [${cyan}Y${normal}]es or [N]o "; read responce
 case $responce in
     [yY] | [yY][Ee][Ss] )  rcloneup=Yes ;;
     [nN] | [nN][Oo]     )  rcloneup=No  ;;
-    ""   | *            )  rcloneup=No  ;;
+    ""   | *            )  rcloneup=Yes ;;
 esac
 
 [[ $rcloneup == Yes ]]  && echo -e "${bold}The script will upload results to ${cyan}$RCLONEPATH${normal}"
@@ -892,6 +892,7 @@ if [[ ! $bdscan == no ]] ; then
         [nN] | [nN][Oo]     )  showinfo=No  ;;
         ""   | *            )  showinfo=Yes ;;
     esac
+    echo
     if [[ $showinfo == Yes ]] ; then
         echo -e "\n${bold}${blue}--------------------------------------------- BDinfo Main Summary ----------------------------------------------${normal}\n"
         cat "${outputpath}/bdinfo.main.txt"
