@@ -6,7 +6,7 @@
 # --------------------------------------------------------------------------------
 # nano $(which bluray)
 BDDATE=2018.10.11
-BDVER=2.7.4
+BDVER=2.7.5
 DeBUG=0
 # sed -i "s/DeBUG=0/DeBUG=1/" $(which bluray)
 # --------------------------------------------------------------------------------
@@ -118,7 +118,7 @@ appmissing="Yes" ; fi ; }
 
 
 # 检查必要软件是否齐全
-function _check_install_2(){ for apps in ffmpeg vcs mono mktorrent convert montage identify bash getopt cut bc ; do app_name=$apps; _check_install; done; rm -rf tmpmissingapp ; }
+function _check_install_2(){ for apps in ffmpeg vcs mono mktorrent convert montage identify bash getopt cut bc nconvert; do app_name=$apps; _check_install; done; rm -rf tmpmissingapp ; }
 
 
 # 有 root 权限的盒子安装 ffmpeg
@@ -140,7 +140,11 @@ else apt-get -y install ffmpeg ; fi ; }
 
 
 # 有 root 权限的盒子安装 vcs
-function _install_vcs() { wget --no-check-certificate -qO /usr/local/bin/vcs https://raw.githubusercontent.com/Aniverse/inexistence/master/03.Files/app/vcs && chmod 777 /usr/local/bin/vcs ; }
+function _install_vcs() { wget --no-check-certificate -qO /usr/local/bin/vcs https://raw.githubusercontent.com/Aniverse/bluray/master/tools/vcs && chmod 755 /usr/local/bin/vcs ; }
+
+
+# 有 root 权限的盒子安装 nconvert
+function _install_nconvert() { wget --no-check-certificate -qO /usr/local/bin/vcs https://raw.githubusercontent.com/Aniverse/bluray/master/tools/nconvert && chmod 755 /usr/local/bin/vcs ; }
 
 
 # 有 root 权限的盒子安装 bdinfo
@@ -227,8 +231,9 @@ while [[ $appmissing == Yes ]]; do
                              installresponce=0 && echo -e "${baihongse}${bold}ERROR${normal}${bold} You DONOT have ROOT privilege${normal}\n"
                          else
                              apt-get install -y mono-complete mktorrent imagemagick
-                             [[ ! $( command -v ffmpeg ) ]] && _install_ffmpeg
-                             [[ ! $( command -v vcs ) ]] && _install_vcs
+                             [[ ! $( command -v ffmpeg )   ]] && _install_ffmpeg
+                             [[ ! $( command -v vcs    )   ]] && _install_vcs
+                             [[ ! $( command -v nconvert ) ]] && _install_nconvert
                              _install_bdinfo ; installdone=1 ; appmissing=No ; _check_install_2
                          fi ;;
             02 | 2 | "") # 无需 root，使用脚本内置库运行
