@@ -5,8 +5,8 @@
 #
 # --------------------------------------------------------------------------------
 # nano $(which bluray)
-BDDATE=2018.10.10
-BDVER=2.7.3
+BDDATE=2018.10.11
+BDVER=2.7.4
 DeBUG=0
 # sed -i "s/DeBUG=0/DeBUG=1/" $(which bluray)
 # --------------------------------------------------------------------------------
@@ -145,7 +145,7 @@ function _install_vcs() { wget --no-check-certificate -qO /usr/local/bin/vcs htt
 
 # 有 root 权限的盒子安装 bdinfo
 function _install_bdinfo() {
-if [[ ! $bdinfocli_path ]]; then
+if [[ ! -f $bdinfocli_path ]]; then
 mkdir -p /etc/inexistence/02.Tools
 cd /etc/inexistence/02.Tools
 # svn co https://github.com/Aniverse/bluray/trunk/tools/BDinfoCli
