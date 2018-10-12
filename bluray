@@ -150,11 +150,12 @@ function _install_nconvert() { wget --no-check-certificate -qO /usr/local/bin/vc
 # 有 root 权限的盒子安装 bdinfo
 function _install_bdinfo() {
 if [[ ! -f $bdinfocli_path ]]; then
-mkdir -p /etc/inexistence/02.Tools
-cd /etc/inexistence/02.Tools
-# svn co https://github.com/Aniverse/bluray/trunk/tools/BDinfoCli
-wget -q https://github.com/Aniverse/BitTorrentClientCollection/raw/master/BDTools/BDinfoCli.0.7.5.tar.gz && tar zxf BDinfoCli.0.7.5.tar.gz && rm -f BDinfoCli.0.7.5.tar.gz
-chmod 755 /etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe ; fi ; }
+    mkdir -p /etc/inexistence/02.Tools
+    cd /etc/inexistence/02.Tools
+  # svn co https://github.com/Aniverse/bluray/trunk/tools/BDinfoCli
+    wget -q https://github.com/Aniverse/BitTorrentClientCollection/raw/master/BDTools/BDinfoCli.0.7.5.tar.gz && tar zxf BDinfoCli.0.7.5.tar.gz && rm -f BDinfoCli.0.7.5.tar.gz
+    chmod 755 /etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe
+fi ; }
 
 
 # 检查内置库是否存在、指定路径
@@ -811,7 +812,7 @@ for c in {01..10} ; do
     [[ $DeBUG == 0 ]] && echo -ne "Writing screenshot$c.png from timestamp $timestamp ... "
     [[ $DeBUG == 1 ]] && echo -e "\n${bailanse}Writing screenshot$c.png from timestamp $timestamp\n${normal}"
 
-    if [[ $resolution == 1080p ]] || [[ $resolution == input ]] || [[ $resolution == input_opt ]] || [[ $resolution == autoar ]]; then
+    if [[ $resolution == 2160p ]] || [[ $resolution == 1080p ]] || [[ $resolution == input ]] || [[ $resolution == input_opt ]] || [[ $resolution == autoar ]]; then
         [[ $DeBUG == 0 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -vframes 1 -s $fenbianlv "${outputpath}/screenshot${c}.png" >> /dev/null 2>&1
         [[ $DeBUG == 1 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -vframes 1 -s $fenbianlv "${outputpath}/screenshot${c}.png"
     elif [[ $resolution == auto ]]; then
