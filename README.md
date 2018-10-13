@@ -15,7 +15,7 @@ chmod +x /usr/local/bin/bluray
 
 Shared seedbox with SSH access  
 ```
-cd ; git clone https://github.com/Aniverse/bluray
+cd ; git clone https://github.com/Aniverse/bluray ; chmod -R +x ~/bluray
 echo "PATH=~/bluray:$PATH" >> ~/.bashrc ; PATH=~/bluray:$PATH
 ```
 
@@ -38,13 +38,14 @@ echo "PATH=~/bluray:$PATH" >> ~/.bashrc ; PATH=~/bluray:$PATH
 文件扩展名是 ISO、且挂载后目录里有 BDMV 文件夹存在的，则认为是 BDISO  
 
 - **自动挂载镜像**  
-本操作需要用 root 权限执行 mount 命令，如无 root 权限则无法使用  
+本操作需要用 root 权限执行 mount 命令，如无 root 权限则无法使用（即使你有 mount 权限也不行）  
 如果是 BDISO，会挂载成 BDMV，并问你是否需要对这个挂载生成的文件夹重命名  
 （有时候 BDISO 的标题就是 DISC1 之类的，重命名下可能更好）  
 考虑到操作完成后可能还需要做种，因此脚本不做解除挂载的操作，如有需要，请使用 `jiegua` 脚本  
 
 - **截图**  
 自动寻找 BD 里体积最大的 m2ts 截 10 张 png 图，可以自定义截图分辨率  
+截图的时间轴根据视频时长自动确定，但是时间轴是固定而不是随机的  
 由于某些 BD 的实际显示分辨率和原始分辨率不一样，因此脚本对分辨率做了计算，默认使用 DAR 的分辨率  
 如果输入的文件名中出现了 HEVC、2160p、UHD 之类的字眼，则认为是 UHD Blu-ray，会提示截图可能出现问题  
 
@@ -71,6 +72,10 @@ BDinfo 会输出三个报告，Full report、 Main Summary、Quick Summary
 
 - **使用 rclone 同步文件**  
 需要你自己设置好 rclone，且在脚本里设置好 rclone remote path 才能使用（不然这个选项不会出现）  
+
+- **打包文件，并生成 https 下载直链**  
+需要已安装好 rar，并有能提供 http 下载链接的环境（inexistence 的 rtinst 里带了 nginx + h5ai）  
+昨晚上述准备后，修改脚本 30 行左右的位置来修改具体的参数以及启用本功能  
 
 ![正常运行](https://github.com/Aniverse/filesss/raw/master/Images/2018.02.22.bluray.03.png)
 
