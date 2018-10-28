@@ -5,8 +5,8 @@
 #
 # --------------------------------------------------------------------------------
 # nano $(which bluray)
-BDDATE=2018.10.13
-BDVER=2.7.6
+BDDATE=2018.10.28
+BDVER=2.7.7
 DeBUG=0
 # sed -i "s/DeBUG=0/DeBUG=1/" $(which bluray)
 # --------------------------------------------------------------------------------
@@ -110,11 +110,12 @@ function _logo() { clear ; wget --no-check-certificate -t1 -T7 -qO- https://gith
 function _check_install(){
 app_location=$( command -v ${app_name} )
 if [[ ! -e $app_location ]]; then
-eval "${app_name}"_installed=No
-echo "${app_name} " >> tmpmissingapp
-sed -i ':t;N;s/\n//;b t' tmpmissingapp
-tmpmissingapp=$(cat tmpmissingapp)
-appmissing="Yes" ; fi ; }
+    eval "${app_name}"_installed=No
+    echo "${app_name} " >> tmpmissingapp
+    sed -i ':t;N;s/\n//;b t' tmpmissingapp
+    tmpmissingapp=$(cat tmpmissingapp)
+    appmissing="Yes"
+fi ; }
 
 
 # 检查必要软件是否齐全
@@ -162,7 +163,7 @@ fi ; }
 function _check_library() {
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 if [[ ! `ls "${DIR}" | grep -E "mono.net-4.0"` ]] && [[ `command -v git` ]]; then
-    echo -e "\n${bold}Git found, cloning library ...\n"
+    echo -e "\n${bold}Git found, cloning library ...${normal}\n"
     cd "${DIR}" ; rm -rf bluray-2*
     [[ $DeBUG == 1 ]] && echo -e "\nDIR = ${DIR}\n" && ls
     git clone --depth=1 https://github.com/Aniverse/bluray bluray-$BDVER
@@ -224,7 +225,7 @@ while [[ $appmissing == Yes ]]; do
 
         while [[ $installresponce = 0 ]]; do
             installresponce=1
-            echo -n "${yellow}${bold}What would you like to do?${normal} (Default 02) " ; read -e responce ; echo
+            echo -n "${yellow}${bold}What would you like to do?${normal} (Default ${cyan}02${normal}) " ; read -e responce ; echo
         done
 
         case $responce in
@@ -244,6 +245,7 @@ while [[ $appmissing == Yes ]]; do
                          installdone=1 ; appmissing=No ; _check_install_2 ;;
             03 | 3)      # 继续运行
                          echo "${bold}There might be some issues then ...${normal}" ;;
+						 installdone=1 ; appmissing=No2
             04 | 4)      # 退出脚本
                          echo "${bold}Exiting script ...${normal}" ; exit 0 ;;
             *)           # 重新输入
@@ -774,10 +776,12 @@ function _getinfo() {
 [[ $bdscan == manual ]] && mono "${bdinfocli_path}" "${bdpath}" "${outputpath}"
 
 if [[ ! $bdscan == no ]]; then
-    sed -n '/QUICK SUMMARY/,//p' "${outputpath}/BDINFO.${file_title}.txt" > temptext
-    count=`wc -l temptext | awk '{print $1-1}' `
-    head -n $count temptext > "${outputpath}/bdinfo.quick.txt"
-    rm temptext
+
+  # BDinfoCLI 里不输出 Quick Summary
+  # sed -n '/QUICK SUMMARY/,//p' "${outputpath}/BDINFO.${file_title}.txt" > temptext
+  # count=`wc -l temptext | awk '{print $1-1}' `
+  # head -n $count temptext > "${outputpath}/bdinfo.quick.txt"
+  # rm temptext
 
     sed -n '/DISC INFO/,/FILES/p' "${outputpath}/BDINFO.${file_title}.txt" > temptext
     count=`wc -l temptext | awk '{print $1-2}' `
@@ -786,6 +790,7 @@ if [[ ! $bdscan == no ]]; then
 
     mv "${outputpath}/BDINFO.${file_title}.txt" "${outputpath}/bdinfo.full.txt"
     echo -e "\n\n${bold}${green}Scanning BDinfo DONE${normal}\n\n"
+
 fi ; }
 
 
@@ -906,9 +911,9 @@ if [[ ! $bdscan == no ]] ; then
     esac
     echo
     if [[ $showinfo == Yes ]] ; then
-        echo -e "\n${bold}${blue}--------------------------------------------- BDinfo Main Summary ----------------------------------------------${normal}\n"
+        echo -e "\n${bold}${blue}-------------------------------------- BDinfo Main Summary ---------------------------------------${normal}\n"
         cat "${outputpath}/bdinfo.main.txt"
-        echo -e "\n${bold}${blue}--------------------------------------------------- BDinfo END -------------------------------------------------${normal}"
+        echo -e "\n${bold}${blue}------------------------------------------- BDinfo END -------------------------------------------${normal}"
     fi
 fi
 
