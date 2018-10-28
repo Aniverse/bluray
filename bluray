@@ -244,8 +244,7 @@ while [[ $appmissing == Yes ]]; do
                          _check_library
                          installdone=1 ; appmissing=No ; _check_install_2 ;;
             03 | 3)      # 继续运行
-                         echo "${bold}There might be some issues then ...${normal}" ;;
-						 installdone=1 ; appmissing=No2
+						 installdone=1 ; appmissing=No2 ;;
             04 | 4)      # 退出脚本
                          echo "${bold}Exiting script ...${normal}" ; exit 0 ;;
             *)           # 重新输入
@@ -259,6 +258,7 @@ done
 
 _logo
 [[ $NoRoot == 1 ]] && echo -e "\n${bold}Since you run this script without root privileges, BDISO is not supported${normal}"
+[[ $appmissing == No2 ]] && echo "${bold}There might be some issues since  ...${normal}"
 echo -e "\n${bold}Good, All the needed softwares are installed ...${normal}" ; }
 
 
