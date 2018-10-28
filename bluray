@@ -6,7 +6,7 @@
 # --------------------------------------------------------------------------------
 # nano $(which bluray)
 BDDATE=2018.10.28
-BDVER=2.7.7
+BDVER=2.7.8
 DeBUG=0
 # sed -i "s/DeBUG=0/DeBUG=1/" $(which bluray)
 # --------------------------------------------------------------------------------
@@ -258,8 +258,11 @@ done
 
 _logo
 [[ $NoRoot == 1 ]] && echo -e "\n${bold}Since you run this script without root privileges, BDISO is not supported${normal}"
-[[ $appmissing == No2 ]] && echo "${bold}There might be some issues since  ...${normal}"
-echo -e "\n${bold}Good, All the needed softwares are installed ...${normal}" ; }
+if [[ $appmissing == No2 ]]; then
+    echo -e "\n${bold}There might be some issues since ${baihongse}${tmpmissingapp%?}${normal}${bold} is missing ...${normal}"
+else
+    echo -e "\n${bold}Good, All the needed softwares are installed ...${normal}"
+fi ; }
 
 
 
