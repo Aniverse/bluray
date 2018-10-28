@@ -6,7 +6,7 @@
 # --------------------------------------------------------------------------------
 # nano $(which bluray)
 BDDATE=2018.10.28
-BDVER=2.7.8
+BDVER=2.7.9
 DeBUG=0
 # sed -i "s/DeBUG=0/DeBUG=1/" $(which bluray)
 # --------------------------------------------------------------------------------
@@ -47,6 +47,7 @@ reset_standout=$(tput rmso); normal=$(tput sgr0); alert=${white}${on_red}; title
 baihuangse=${white}${on_yellow}; bailanse=${white}${on_blue}; bailvse=${white}${on_green};
 baiqingse=${white}${on_cyan}; baihongse=${white}${on_red}; baizise=${white}${on_magenta}; jiacu=${normal}${bold}
 heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis); guangbiao=$(tput cnorm)
+CW="${bold}${baihongse} ERROR ${jiacu}";ZY="${baihongse}${bold} ATTENTION ${jiacu}";JG="${baihongse}${bold} WARNING ${jiacu}"
 # --------------------------------------------------------------------------------
 bdinfocli_path="/etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe"
 # --------------------------------------------------------------------------------
@@ -257,9 +258,9 @@ done
 
 
 _logo
-[[ $NoRoot == 1 ]] && echo -e "\n${bold}Since you run this script without root privileges, BDISO is not supported${normal}"
+[[ $NoRoot == 1 ]] && echo -e "\n${ZY}Since you run this script without root privileges, BDISO is not supported${normal}"
 if [[ $appmissing == No2 ]]; then
-    echo -e "\n${bold}There might be some issues since ${baihongse}${tmpmissingapp%?}${normal}${bold} is missing ...${normal}"
+    echo -e "\n${JG}There might be some issues since ${baihongse}${tmpmissingapp%?}${normal}${bold} is missing ...${normal}"
 else
     echo -e "\n${bold}Good, All the needed softwares are installed ...${normal}"
 fi ; }
