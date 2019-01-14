@@ -3,10 +3,13 @@
 # Author: Aniverse
 # https://github.com/Aniverse/bluray
 #
+# bash <(curl -s https://raw.githubusercontent.com/Aniverse/bluray/master/bluray)
+# wget -qO /usr/local/bin/bluray https://github.com/Aniverse/bluray/raw/master/bluray && chmod +x /usr/local/bin/bluray
+#
 # --------------------------------------------------------------------------------
 # nano $(which bluray)
 BDDATE=2019.01.14
-BDVER=2.8.4
+BDVER=2.8.5
 DeBUG=0
 # sed -i "s/DeBUG=0/DeBUG=1/" $(which bluray)
 # --------------------------------------------------------------------------------
@@ -334,8 +337,8 @@ UHDBD=0              ; [[ ` echo "${BDname}" | grep -E "[He][Ee][Vv][Cc]" ` ]] &
 [[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "2160[Pp]" ` ]]         && UHDBD=1
 [[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "\b[Uu][Hh][Dd]\b" ` ]] && UHDBD=1
 
-[[ $UHDBD == 1 ]] && [[ $NoRoot == 1 ]] && using_bdinfo=new && bdinfocli_path="$DIR"/tools/BDinfoCli.0.7.3/BDInfo.exe
-[[ $UHDBD == 1 ]] && [[ $NoRoot =! 1 ]] && using_bdinfo=new && bdinfocli_path="/etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe"
+[[ $UHDBD == 1 ]] && [[   $NoRoot == 1 ]] && using_bdinfo=new && bdinfocli_path="$DIR"/tools/BDinfoCli.0.7.3/BDInfo.exe
+[[ $UHDBD == 1 ]] && [[ ! $NoRoot == 1 ]] && using_bdinfo=new && bdinfocli_path="/etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe"
 
 # if [[ ! $UHDBD == 1 ]] && [[ -d "${pathtostuff}" ]]; then
 if [[ -d "${pathtostuff}" ]]; then
