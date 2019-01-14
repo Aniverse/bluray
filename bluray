@@ -9,7 +9,7 @@
 # --------------------------------------------------------------------------------
 # nano $(which bluray)
 BDDATE=2019.01.14
-BDVER=2.8.5
+BDVER=2.8.6
 DeBUG=0
 # sed -i "s/DeBUG=0/DeBUG=1/" $(which bluray)
 # --------------------------------------------------------------------------------
@@ -158,17 +158,13 @@ function _install_nconvert() { wget --no-check-certificate -qO /usr/local/bin/nc
 
 # 有 root 权限的盒子安装 bdinfo
 function _install_bdinfo() {
-if [[ ! -f /etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe ]]; then
+if [[ ! -f /etc/inexistence/02.Tools/BDinfoCli.0.7.3/BDInfo.exe ]]; then
     mkdir -p /etc/inexistence/02.Tools
     cd /etc/inexistence/02.Tools
     svn co https://github.com/Aniverse/bluray/trunk/tools/BDinfoCli.0.7.3
     mv -f BDinfoCli.0.7.3 BDinfoCli
   # wget -q https://github.com/Aniverse/BitTorrentClientCollection/raw/master/BDTools/BDinfoCli.0.7.5.tar.gz && tar zxf BDinfoCli.0.7.5.tar.gz && rm -f BDinfoCli.0.7.5.tar.gz
-  # chmod 755 /etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe
-fi ; }
-
-
-function _install_bdinfo_old() {
+fi
 if [[ ! -f /etc/inexistence/02.Tools/bdinfocli.exe ]]; then
     wget https://github.com/Aniverse/bluray/raw/master/tools/bdinfocli.exe -qO /etc/inexistence/02.Tools/bdinfocli.exe
 fi ; }
@@ -202,7 +198,8 @@ fi
 chmod -R 755 "${DIR}/tools"
 export PATH="$DIR":"$DIR"/tools:$PATH
 export MONO_PATH="$DIR"/mono.net-4.0
-bdinfocli_path="$DIR"/tools/bdinfocli.exe ; }
+bdinfocli_path="$DIR"/tools/bdinfocli.exe
+USE_Built_IN=1 ; }
 # --------------------------------------------------------------------------------
 
 
@@ -337,8 +334,8 @@ UHDBD=0              ; [[ ` echo "${BDname}" | grep -E "[He][Ee][Vv][Cc]" ` ]] &
 [[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "2160[Pp]" ` ]]         && UHDBD=1
 [[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "\b[Uu][Hh][Dd]\b" ` ]] && UHDBD=1
 
-[[ $UHDBD == 1 ]] && [[   $NoRoot == 1 ]] && using_bdinfo=new && bdinfocli_path="$DIR"/tools/BDinfoCli.0.7.3/BDInfo.exe
-[[ $UHDBD == 1 ]] && [[ ! $NoRoot == 1 ]] && using_bdinfo=new && bdinfocli_path="/etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe"
+[[ $UHDBD == 1 ]] && [[   $USE_Built_IN == 1 ]] && using_bdinfo=new && bdinfocli_path="$DIR"/tools/BDinfoCli.0.7.3/BDInfo.exe
+[[ $UHDBD == 1 ]] && [[ ! $USE_Built_IN == 1 ]] && using_bdinfo=new && bdinfocli_path="/etc/inexistence/02.Tools/BDinfoCli.0.7.3/BDInfo.exe"
 
 # if [[ ! $UHDBD == 1 ]] && [[ -d "${pathtostuff}" ]]; then
 if [[ -d "${pathtostuff}" ]]; then
@@ -491,6 +488,8 @@ while [[ $bdscan = "" ]]; do
     echo -e "03) ${cyan}Do not scan BDinfo${normal}"
     echo -ne "${yellow}${bold}Whould you like to scan BDinfo?${normal} (Default: ${cyan}01${normal}) "; read response
 
+    [[ $UHDBD == 1 ]] && echo -e "${bold}${red}ATTENTION${jiacu} Scanning BDinfo of ${blue}UHD Blu-ray${jiacu} maybe failed${normal}"
+
     case $response in
         01 | 1 ) bdscan=auto ;;
         02 | 2 ) bdscan=manual ;;
@@ -526,7 +525,7 @@ while [[ $resolution = "" ]]; do
     echo -e "05) ${cyan}Input a specific resolution${normal}"
     echo -e "06) ${cyan}Do not take screenshots${normal}"
 
-    [[   $UHDBD == 1 ]] && echo -e "${bold}${red}ATTENTION${jiacu} For now there are some issues when taking screenshots of ${blue}UHD Blu-ray${normal}"
+#   [[ $UHDBD == 1 ]] && echo -e "${bold}${red}ATTENTION${jiacu} For now there are some issues when taking screenshots of ${blue}UHD Blu-ray${normal}"
 
     echo -ne "${yellow}${bold}Which resolution of the screenshots would you like?${normal} (Default: ${cyan}04${normal}) "; read response
 
@@ -770,6 +769,13 @@ echo -e "Size = ${bold}${blue}$(du -sB KB $bdpath | awk '{print $1}' | sed "s/kB
 echo -e "File = ${bold}${blue}$(echo $(ls "$bdpath") | sed "s/ /  /g")${normal}"
 echo -e "${normal}"
 
+echo -e "Built-in  Used = $USE_Built_IN"
+echo -e "nconvert  Used = $convert"
+echo -e "bdinfocli Used = $using_bdinfo"
+echo -e "bdinfocli Path = $bdinfocli_path"
+ls -la $bdinfocli_path
+echo -e "${normal}"
+
 [[ $movefile == Yes ]] && { 
 echo -e "${normal}${bold}NEW BDMV folder(without useless files) information${normal}"
 echo -e "Path = ${bold}${blue}${underline}${new_bdpath}${reset_underline}${normal}"
@@ -852,16 +858,18 @@ for c in {01..10} ; do
 #       [[ $DeBUG == 1 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -vframes 1 "${outputpath}/screenshot${c}.png"
 #   fi
 
+# https://forum.videohelp.com/threads/389847-How-to-take-perfect-screenshots-of-UHD-HEVC-vddeos
+
     if [[ $resolution == 2160p ]] || [[ $resolution == 1080p ]] || [[ $resolution == input ]] || [[ $resolution == input_opt ]] || [[ $resolution == autoar ]]; then
         [[ $DeBUG   == 0 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -ss 00:00:01 -frames:v 1 -s $fenbianlv "${outputpath}/screenshot${c}.orgin.png" > /dev/null 2>&1 &&
-        [[ $convert == 1 ]] && nconvert -out png -clevel 6 -o "${outputpath}/screenshot${c}.orgin.png" "${outputpath}/screenshot${c}.png" > /dev/null 2>&1
+        [[ $convert == 1 ]] && nconvert -out png -clevel 6 -o "${outputpath}/screenshot${c}.png" "${outputpath}/screenshot${c}.orgin.png" > /dev/null 2>&1
         [[ $DeBUG   == 1 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -ss 00:00:01 -frames:v 1 -s $fenbianlv "${outputpath}/screenshot${c}.orgin.png" &&
-        [[ $convert == 1 ]] && nconvert -out png -clevel 6 -o "${outputpath}/screenshot${c}.orgin.png" "${outputpath}/screenshot${c}.png"
+        [[ $convert == 1 ]] && nconvert -out png -clevel 6 -o "${outputpath}/screenshot${c}.png" "${outputpath}/screenshot${c}.orgin.png"
     elif [[ $resolution == auto ]]; then
         [[ $DeBUG   == 0 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -ss 00:00:01 -frames:v 1 "${outputpath}/screenshot${c}.orgin.png" > /dev/null 2>&1 &&
-        [[ $convert == 1 ]] && nconvert -out png -clevel 6 -o "${outputpath}/screenshot${c}.orgin.png" "${outputpath}/screenshot${c}.png" > /dev/null 2>&1
+        [[ $convert == 1 ]] && nconvert -out png -clevel 6 -o "${outputpath}/screenshot${c}.png" "${outputpath}/screenshot${c}.orgin.png" > /dev/null 2>&1
         [[ $DeBUG   == 1 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -ss 00:00:01 -frames:v 1 "${outputpath}/screenshot${c}.orgin.png" &&
-        [[ $convert == 1 ]] && nconvert -out png -clevel 6 -o "${outputpath}/screenshot${c}.orgin.png" "${outputpath}/screenshot${c}.png"
+        [[ $convert == 1 ]] && nconvert -out png -clevel 6 -o "${outputpath}/screenshot${c}.png" "${outputpath}/screenshot${c}.orgin.png"
     fi
 
     [[ $DeBUG == 0 ]] && echo -e "${green}DONE${normal}" && rm -f "${outputpath}/screenshot${c}.orgin.png"
@@ -917,9 +925,10 @@ timeused=$(( $endtime - $starttime ))
 
 clear ; echo -e "${bold}Done. Files are stored in ${yellow}\"${outputpath}\"${normal}"
 
-[[ ! $resolution == no ]] && [[ $UHDBD == 1 ]] && echo -e "\n${bold}${red}ATTENTION${jiacu} Some of screenshots may be ${red}broken${jiacu}, you need to check it manually"
+# [[ ! $resolution == no ]] && [[ $UHDBD == 1 ]] && echo -e "\n${bold}${red}ATTENTION${jiacu} Some of screenshots may be ${red}broken${jiacu}, you need to check it manually"
 
-echo ; ls -hAlvZ "${outputpath}" | grep -v total | awk '{print $NF}' | pr -4 -t ; echo
+# echo ; ls -hAlvZ "${outputpath}" | grep -v total | awk '{print $NF}' | pr -4 -t ; echo
+echo ; ls -hAlvZ "${outputpath}" | grep -v total | awk '{print $NF}' | pr -2 -t ; echo
 
 [[ $copy_bdiso_to_bdmv == 1 ]] && echo -e "${bold}BDISO copied to ${yellow}\"${bdpath}\"${normal}\n"
 
