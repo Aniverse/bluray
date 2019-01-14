@@ -6,7 +6,7 @@
 # --------------------------------------------------------------------------------
 # nano $(which bluray)
 BDDATE=2019.01.14
-BDVER=2.8.1
+BDVER=2.8.2
 DeBUG=0
 # sed -i "s/DeBUG=0/DeBUG=1/" $(which bluray)
 # --------------------------------------------------------------------------------
@@ -49,7 +49,8 @@ baiqingse=${white}${on_cyan}; baihongse=${white}${on_red}; baizise=${white}${on_
 heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis); guangbiao=$(tput cnorm)
 CW="${bold}${baihongse} ERROR ${jiacu}";ZY="${baihongse}${bold} ATTENTION ${jiacu}";JG="${baihongse}${bold} WARNING ${jiacu}"
 # --------------------------------------------------------------------------------
-bdinfocli_path="/etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe"
+bdinfocli_path="/etc/inexistence/02.Tools/bdinfocli.exe"
+using_bdinfo=old
 # --------------------------------------------------------------------------------
 
 # 获取参数
@@ -99,6 +100,7 @@ if [[ $Default == 1 ]]; then
     [[ ! $TRACKERA  ]] && { newtorrent=Yes1 ; ANNOUNCE="-a \"\"" ; }
 fi
 
+
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
@@ -120,7 +122,7 @@ fi ; }
 
 
 # 检查必要软件是否齐全
-function _check_install_2(){ for apps in ffmpeg vcs mono mktorrent convert montage identify bash getopt cut nconvert bc expr; do app_name=$apps; _check_install; done; rm -rf tmpmissingapp ; }
+function _check_install_2(){ for apps in ffmpeg vcs mono mktorrent convert montage identify bash getopt cut nconvert bc expr ; do app_name=$apps; _check_install ; done ; rm -rf tmpmissingapp ; }
 
 
 # 有 root 权限的盒子安装 ffmpeg
@@ -156,7 +158,13 @@ if [[ ! -f $bdinfocli_path ]]; then
     cd /etc/inexistence/02.Tools
   # svn co https://github.com/Aniverse/bluray/trunk/tools/BDinfoCli
     wget -q https://github.com/Aniverse/BitTorrentClientCollection/raw/master/BDTools/BDinfoCli.0.7.5.tar.gz && tar zxf BDinfoCli.0.7.5.tar.gz && rm -f BDinfoCli.0.7.5.tar.gz
-    chmod 755 /etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe
+  # chmod 755 /etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe
+fi ; }
+
+
+function _install_bdinfo_old() {
+if [[ ! -f $bdinfocli_path ]]; then
+    wget https://github.com/Aniverse/bluray/raw/master/tools/bdinfocli.exe -qO /etc/inexistence/02.Tools/bdinfocli.exe
 fi ; }
 
 
@@ -188,8 +196,7 @@ fi
 chmod -R 755 "${DIR}/tools"
 export PATH="$DIR":"$DIR"/tools:$PATH
 export MONO_PATH="$DIR"/mono.net-4.0
-# bdinfocli_path="$DIR"/tools/bdinfocli.exe
-bdinfocli_path="$DIR"/tools/BDinfoCli/BDInfo.exe ; }
+bdinfocli_path="$DIR"/tools/bdinfocli.exe ; }
 # --------------------------------------------------------------------------------
 
 
@@ -292,7 +299,7 @@ if [[ ! $disknumber == 0 ]]; then
   # echo -e "\n${bold}You're now mounting ${green}${disknumber}${normal}${bold} disks,the script will unmount all of them ${normal}\n"
     for disk in ` df -lh | grep -Eo "/dev/loop[0-9]+" ` ; do
         ppaatthh=$(basename `df -lh | grep -E "${disk}\>" | awk '{print $6}' `)
-        umount ${disk} # && echo "${cyan}${ppaatthh}${normal} has been unmounted"
+        umount $disk # && echo "${cyan}${ppaatthh}${normal} has been unmounted"
     done
   # echo -e "\n${bold}All ${green}${disknumber}${normal}${bold} disks had been unmounted${normal}\n"
 fi ; }
@@ -323,6 +330,9 @@ BDname=` basename "$pathtostuff" `
 UHDBD=0              ; [[ ` echo "${BDname}" | grep -E "[He][Ee][Vv][Cc]" ` ]] && UHDBD=1
 [[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "2160[Pp]" ` ]]         && UHDBD=1
 [[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "\b[Uu][Hh][Dd]\b" ` ]] && UHDBD=1
+
+[[ $UHDBD == 1 ]] && [[ $NoRoot == 1 ]] && using_bdinfo=new && bdinfocli_path="$DIR"/tools/BDinfoCli/BDInfo.exe
+[[ $UHDBD == 1 ]] && [[ $NoRoot =! 1 ]] && using_bdinfo=new && bdinfocli_path="/etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe"
 
 # if [[ ! $UHDBD == 1 ]] && [[ -d "${pathtostuff}" ]]; then
 if [[ -d "${pathtostuff}" ]]; then
@@ -775,17 +785,18 @@ echo -e "${normal}${bold}${baihongse}                DEBUG INFO END             
 # 获取BD info
 function _getinfo() {
 
-# [[ $bdscan == auto   ]] && echo -ne '1\n' | mono "${bdinfocli_path}" "${bdpath}" "${outputpath}"
-[[ $bdscan == auto   ]] && echo -ne '1\nq\n' | mono "${bdinfocli_path}" "${bdpath}" "${outputpath}"
+[[ $using_bdinfo == old ]] && [[ $bdscan == auto ]] && echo -ne '1\n' | mono "${bdinfocli_path}" "${bdpath}" "${outputpath}"
+[[ $using_bdinfo == new ]] && [[ $bdscan == auto ]] && echo -ne '1\nq\n' | mono "${bdinfocli_path}" "${bdpath}" "${outputpath}"
 [[ $bdscan == manual ]] && mono "${bdinfocli_path}" "${bdpath}" "${outputpath}"
 
 if [[ ! $bdscan == no ]]; then
 
-  # BDinfoCLI 里不输出 Quick Summary
-  # sed -n '/QUICK SUMMARY/,//p' "${outputpath}/BDINFO.${file_title}.txt" > temptext
-  # count=`wc -l temptext | awk '{print $1-1}' `
-  # head -n $count temptext > "${outputpath}/bdinfo.quick.txt"
-  # rm temptext
+    # New BDinfoCLI 不输出 Quick Summary
+    [[ $using_bdinfo == old ]] && {
+    sed -n '/QUICK SUMMARY/,//p' "${outputpath}/BDINFO.${file_title}.txt" > temptext
+    count=`wc -l temptext | awk '{print $1-1}' `
+    head -n $count temptext > "${outputpath}/bdinfo.quick.txt"
+    rm temptext ; }
 
     sed -n '/DISC INFO/,/FILES/p' "${outputpath}/BDINFO.${file_title}.txt" > temptext
     count=`wc -l temptext | awk '{print $1-2}' `
