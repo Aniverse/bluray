@@ -67,7 +67,7 @@ heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis);
 CW="${bold}${baihongse} ERROR ${jiacu}";ZY="${baihongse}${bold} ATTENTION ${jiacu}";JG="${baihongse}${bold} WARNING ${jiacu}"
 # --------------------------------------------------------------------------------
 BDDATE=2019.01.14
-BDVER=2.8.7
+BDVER=2.8.8
 DeBUG=0
 # --------------------------------------------------------------------------------
 bdinfocli_path="/etc/inexistence/02.Tools/bdinfocli.exe"
@@ -218,6 +218,10 @@ export PATH="$DIR":"$DIR"/tools:$PATH
 export MONO_PATH="$DIR"/mono.net-4.0
 bdinfocli_path="$DIR"/tools/bdinfocli.exe
 USE_Built_IN=1 ; }
+
+# Ctrl+C 时恢复样式
+cancel() { echo -e "${normal}" ; exit ; }
+trap cancel SIGINT
 # --------------------------------------------------------------------------------
 
 
