@@ -6,7 +6,7 @@
 # --------------------------------------------------------------------------------
 # nano $(which bluray)
 BDDATE=2019.01.14
-BDVER=2.8.2
+BDVER=2.8.3
 DeBUG=0
 # sed -i "s/DeBUG=0/DeBUG=1/" $(which bluray)
 # --------------------------------------------------------------------------------
@@ -28,9 +28,9 @@ NoInstall=0
 # --------------------------------------------------------------------------------
 # 使用 rar 打包文件，最后给出下载链接（需要开启 http 下载以及安装了 rar）
 # 以下预设主要针对使用了 inexistence 脚本的用户，其他用户请根据实际情况修改
-#
+# 把 BACTH=0 改成 BATCH=1 以启用这个功能
 BATCH=0
-DOWNLOAD_LINK_BASE="https://$( wget --no-check-certificate -t1 -T6 -qO- v4.ipv6-test.com/api/myip.php )/h5ai/inexistence/04.Upload"
+[[ $BATCH == 1 ]] && DOWNLOAD_LINK_BASE="https://$( wget --no-check-certificate -t1 -T6 -qO- v4.ipv6-test.com/api/myip.php )/h5ai/inexistence/04.Upload"
 WEB_FOLDER="/etc/inexistence/04.Upload"
 # --------------------------------------------------------------------------------
 # 如果你要用 rclone 自动上传文件，请把 RCLONE 改成 1，然后 RCLONEPATH 改成你 rclone remote 的路径（请确保 rclone 命令可用）
@@ -153,17 +153,18 @@ function _install_nconvert() { wget --no-check-certificate -qO /usr/local/bin/nc
 
 # 有 root 权限的盒子安装 bdinfo
 function _install_bdinfo() {
-if [[ ! -f $bdinfocli_path ]]; then
+if [[ ! -f /etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe ]]; then
     mkdir -p /etc/inexistence/02.Tools
     cd /etc/inexistence/02.Tools
-  # svn co https://github.com/Aniverse/bluray/trunk/tools/BDinfoCli
-    wget -q https://github.com/Aniverse/BitTorrentClientCollection/raw/master/BDTools/BDinfoCli.0.7.5.tar.gz && tar zxf BDinfoCli.0.7.5.tar.gz && rm -f BDinfoCli.0.7.5.tar.gz
+    svn co https://github.com/Aniverse/bluray/trunk/tools/BDinfoCli.0.7.3
+    mv -f BDinfoCli.0.7.3 BDinfoCli
+  # wget -q https://github.com/Aniverse/BitTorrentClientCollection/raw/master/BDTools/BDinfoCli.0.7.5.tar.gz && tar zxf BDinfoCli.0.7.5.tar.gz && rm -f BDinfoCli.0.7.5.tar.gz
   # chmod 755 /etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe
 fi ; }
 
 
 function _install_bdinfo_old() {
-if [[ ! -f $bdinfocli_path ]]; then
+if [[ ! -f /etc/inexistence/02.Tools/bdinfocli.exe ]]; then
     wget https://github.com/Aniverse/bluray/raw/master/tools/bdinfocli.exe -qO /etc/inexistence/02.Tools/bdinfocli.exe
 fi ; }
 
@@ -331,7 +332,7 @@ UHDBD=0              ; [[ ` echo "${BDname}" | grep -E "[He][Ee][Vv][Cc]" ` ]] &
 [[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "2160[Pp]" ` ]]         && UHDBD=1
 [[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "\b[Uu][Hh][Dd]\b" ` ]] && UHDBD=1
 
-[[ $UHDBD == 1 ]] && [[ $NoRoot == 1 ]] && using_bdinfo=new && bdinfocli_path="$DIR"/tools/BDinfoCli/BDInfo.exe
+[[ $UHDBD == 1 ]] && [[ $NoRoot == 1 ]] && using_bdinfo=new && bdinfocli_path="$DIR"/tools/BDinfoCli.0.7.3/BDInfo.exe
 [[ $UHDBD == 1 ]] && [[ $NoRoot =! 1 ]] && using_bdinfo=new && bdinfocli_path="/etc/inexistence/02.Tools/BDinfoCli/BDInfo.exe"
 
 # if [[ ! $UHDBD == 1 ]] && [[ -d "${pathtostuff}" ]]; then
@@ -838,15 +839,27 @@ for c in {01..10} ; do
     [[ $DeBUG == 0 ]] && echo -ne "Writing screenshot$c.png from timestamp $timestamp ... "
     [[ $DeBUG == 1 ]] && echo -e "\n${bailanse}Writing screenshot$c.png from timestamp $timestamp\n${normal}"
 
+#   if [[ $resolution == 2160p ]] || [[ $resolution == 1080p ]] || [[ $resolution == input ]] || [[ $resolution == input_opt ]] || [[ $resolution == autoar ]]; then
+#       [[ $DeBUG == 0 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -vframes 1 -s $fenbianlv "${outputpath}/screenshot${c}.png" >> /dev/null 2>&1
+#       [[ $DeBUG == 1 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -vframes 1 -s $fenbianlv "${outputpath}/screenshot${c}.png"
+#   elif [[ $resolution == auto ]]; then
+#       [[ $DeBUG == 0 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -vframes 1 "${outputpath}/screenshot${c}.png" >> /dev/null 2>&1
+#       [[ $DeBUG == 1 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -vframes 1 "${outputpath}/screenshot${c}.png"
+#   fi
+
     if [[ $resolution == 2160p ]] || [[ $resolution == 1080p ]] || [[ $resolution == input ]] || [[ $resolution == input_opt ]] || [[ $resolution == autoar ]]; then
-        [[ $DeBUG == 0 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -vframes 1 -s $fenbianlv "${outputpath}/screenshot${c}.png" >> /dev/null 2>&1
-        [[ $DeBUG == 1 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -vframes 1 -s $fenbianlv "${outputpath}/screenshot${c}.png"
+        [[ $DeBUG == 0 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -ss 00:00:01 -frames:v 1 -s $fenbianlv "${outputpath}/screenshot${c}.orgin.png" > /dev/null 2>&1 &&
+                             nconvert -out png -clevel 6 -o "${outputpath}/screenshot${c}.orgin.png" "${outputpath}/screenshot${c}.png" > /dev/null 2>&1
+        [[ $DeBUG == 1 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -ss 00:00:01 -frames:v 1 -s $fenbianlv "${outputpath}/screenshot${c}.orgin.png" &&
+                             nconvert -out png -clevel 6 -o "${outputpath}/screenshot${c}.orgin.png" "${outputpath}/screenshot${c}.png"
     elif [[ $resolution == auto ]]; then
-        [[ $DeBUG == 0 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -vframes 1 "${outputpath}/screenshot${c}.png" >> /dev/null 2>&1
-        [[ $DeBUG == 1 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -vframes 1 "${outputpath}/screenshot${c}.png"
+        [[ $DeBUG == 0 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -ss 00:00:01 -frames:v 1 "${outputpath}/screenshot${c}.orgin.png" > /dev/null 2>&1 &&
+                             nconvert -out png -clevel 6 -o "${outputpath}/screenshot${c}.orgin.png" "${outputpath}/screenshot${c}.png" > /dev/null 2>&1
+        [[ $DeBUG == 1 ]] && ffmpeg -y -ss $timestamp -i "$main_m2ts_path" -ss 00:00:01 -frames:v 1 "${outputpath}/screenshot${c}.orgin.png" &&
+                             nconvert -out png -clevel 6 -o "${outputpath}/screenshot${c}.orgin.png" "${outputpath}/screenshot${c}.png"
     fi
 
-    [[ $DeBUG == 0 ]] && echo -e "${green}DONE${normal}"
+    [[ $DeBUG == 0 ]] && echo -e "${green}DONE${normal}" && rm -f "${outputpath}/screenshot${c}.orgin.png"
     [[ $DeBUG == 1 ]] && echo -e "\n${green}DONE${normal}\n"
 
 done
