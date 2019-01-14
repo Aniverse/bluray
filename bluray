@@ -5,8 +5,8 @@
 #
 # --------------------------------------------------------------------------------
 # nano $(which bluray)
-BDDATE=2018.12.16
-BDVER=2.8.0
+BDDATE=2019.01.14
+BDVER=2.8.1
 DeBUG=0
 # sed -i "s/DeBUG=0/DeBUG=1/" $(which bluray)
 # --------------------------------------------------------------------------------
@@ -146,7 +146,7 @@ function _install_vcs() { wget --no-check-certificate -qO /usr/local/bin/vcs htt
 
 
 # 有 root 权限的盒子安装 nconvert
-function _install_nconvert() { wget --no-check-certificate -qO /usr/local/bin/vcs https://raw.githubusercontent.com/Aniverse/bluray/master/tools/nconvert && chmod 755 /usr/local/bin/nconvert ; }
+function _install_nconvert() { wget --no-check-certificate -qO /usr/local/bin/nconvert https://raw.githubusercontent.com/Aniverse/bluray/master/tools/nconvert && chmod 755 /usr/local/bin/nconvert ; }
 
 
 # 有 root 权限的盒子安装 bdinfo
