@@ -15,8 +15,8 @@ chmod +x /usr/local/bin/bluray
 
 Shared seedbox with SSH access  
 ```
-cd ; git clone https://github.com/Aniverse/bluray ; chmod -R +x ~/bluray
-echo "PATH=~/bluray:$PATH" >> ~/.bashrc ; PATH=~/bluray:$PATH
+cd ; git clone https://github.com/Aniverse/bluray ; chmod -R +x $HOME/bluray
+echo "PATH=$HOME/bluray:$PATH" >> $HOME/.bashrc ; PATH=$HOME/bluray:$PATH
 ```
 
 ### Guide
@@ -100,5 +100,5 @@ BDinfo 会输出三个报告，Full report、 Main Summary、Quick Summary
   -------------------
 ### Some references
 
-https://xxxxxx.org/forums/viewtopic?topicid=61434  
+https://xxxxxx.org/forums/viewtopic?topicid=61434 (Thanks to 9mm)  
 
