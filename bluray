@@ -67,7 +67,7 @@ heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis);
 CW="${bold}${baihongse} ERROR ${jiacu}";ZY="${baihongse}${bold} ATTENTION ${jiacu}";JG="${baihongse}${bold} WARNING ${jiacu}"
 # --------------------------------------------------------------------------------
 BDDATE=2019.02.25
-BDVER=2.9.5
+BDVER=2.9.6
 DeBUG=0
 # --------------------------------------------------------------------------------
 using_bdinfo=new
@@ -807,7 +807,7 @@ echo -e "\n${bold}The followings are current file system disk${normal}${blue}" ;
 
 echo -e "${normal}${bold}BDMV folder information${normal}"
 echo -e "Path = ${bold}${blue}${underline}${bdpath}${reset_underline}${normal}"
-echo -e "Size = ${bold}${blue}$(du -sB KB $bdpath | awk '{print $1}' | sed "s/kB/ KB/")${normal}"
+echo -e "Size = ${bold}${blue}$(du -sB KB "$bdpath" | awk '{print $1}' | sed "s/kB/ KB/")${normal}"
 echo -e "File = ${bold}${blue}$(echo $(ls "$bdpath") | sed "s/ /  /g")${normal}"
 echo -e "${normal}"
 
