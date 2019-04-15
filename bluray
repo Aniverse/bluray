@@ -38,7 +38,7 @@ BATCH=0
 WEB_FOLDER="/etc/inexistence/04.Upload"
 # --------------------------------------------------------------------------------
 #
-# 如果你要用 rclone 自动上传文件，请把 RCLONE 改成 1，然后 RCLONEPATH 改成你 rclone remote 的路径（请确保 rclone 命令可用）
+# 如果你要用 rclone 自动上传文件，请把 RCLONE 改成 1，然后 RCLONEPATH 改成你 rclone remote 的路径（请确保 rclone 已配置好且在 $PATH 内）
 #
 RCLONE=0
 RCLONEPATH="Replace:/here/with/your/remote/path"
@@ -66,8 +66,8 @@ baiqingse=${white}${on_cyan}; baihongse=${white}${on_red}; baizise=${white}${on_
 heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis); guangbiao=$(tput cnorm)
 CW="${bold}${baihongse} ERROR ${jiacu}";ZY="${baihongse}${bold} ATTENTION ${jiacu}";JG="${baihongse}${bold} WARNING ${jiacu}"
 # --------------------------------------------------------------------------------
-BDDATE=2019.02.25
-BDVER=2.9.6
+BDDATE=2019.04.15
+BDVER=2.9.7
 DeBUG=0
 # --------------------------------------------------------------------------------
 using_bdinfo=new
@@ -180,7 +180,11 @@ function _install_vcs() { wget --no-check-certificate -qO /usr/local/bin/vcs htt
 
 
 # 有 root 权限的盒子安装 nconvert
-function _install_nconvert() { wget --no-check-certificate -qO /usr/local/bin/nconvert https://raw.githubusercontent.com/Aniverse/bluray/master/tools/nconvert && chmod 755 /usr/local/bin/nconvert ; }
+function _install_nconvert() { 
+wget -t1 -T5 http://download.xnview.com/NConvert-linux64.tgz -O NConvert-linux64.tgz && {
+tar zxf NConvert-linux64.tgz
+mv NConvert/nconvert /usr/local/bin
+rm -rf NConvert* ; } ; }
 
 
 # 有 root 权限的盒子安装 bdinfo
@@ -302,7 +306,7 @@ done
 _logo
 [[ $NoRoot == 1 ]] && echo -e "\n${ZY}Since you run this script without root privileges, BDISO is not supported${normal}"
 if [[ $appmissing == No2 ]]; then
-    echo -e "\n${JG}There might be some issues since ${baihongse}${tmpmissingapp%?}${normal}${bold} is missing ...${normal}"
+    echo -e "\n${JG} There might be some issues since ${baihongse}${tmpmissingapp%?}${normal}${bold} is missing ...${normal}"
 else
     echo -e "\n${bold}Good, All the needed softwares are installed ...${normal}"
 fi ; }
