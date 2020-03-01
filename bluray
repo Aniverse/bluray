@@ -71,7 +71,7 @@ heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis);
 CW="${bold}${baihongse} ERROR ${jiacu}";ZY="${baihongse}${bold} ATTENTION ${jiacu}";JG="${baihongse}${bold} WARNING ${jiacu}"
 # --------------------------------------------------------------------------------
 BDDATE=2020.03.01
-BDVER=3.0.0
+BDVER=3.0.1
 DeBUG=0
 # --------------------------------------------------------------------------------
 using_bdinfo=new
@@ -966,7 +966,7 @@ function _rcloneup() { rclone copy -v --stats 5s "${outputpath}" "${RCLONEPATH}"
 
 # 结果输出
 function _end() {
-    if [[ $move_when_complete == 1 ]]
+    if [[ $move_when_complete == 1 ]]; then
         mv ` ls "/etc/inexistence/06.BluRay/temp/$file_title_clean" ` "$bdpath"
         rm -rf "/etc/inexistence/06.BluRay/temp/$file_title_clean"
     fi
