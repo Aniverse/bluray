@@ -3,14 +3,13 @@
 > A Script used for scanning BDinfo and take screenshots for BDISO or BDMV on Linux  
 
 转发蓝光原盘时可以使用的一个脚本  
-支持对 BDISO 或 BDMV 进行如下操作：扫描 BDinfo、截图、生成缩略图、重新制作种子  
+支持对 BDISO 或 BDMV 进行如下操作：扫描 BDinfo、截图、重新制作种子  
 
 ### Installation
 
-Dedicated Server or VPS  
+Dedicated Server or VPS with root privilege  
 ```
-wget -qO /usr/local/bin/bluray https://github.com/Aniverse/bluray/raw/master/bluray
-chmod +x /usr/local/bin/bluray
+bash <(wget -qO- https://git.io/bluray) -u
 ```
 
 Shared seedbox with SSH access  
@@ -55,6 +54,7 @@ BDinfo 采用 mono + bdinfocli 0.7.5 来实现
 BDinfo 会输出三个报告，Full report、 Main Summary、Quick Summary  
 
 - **生成缩略图**  
+**2020.03.01 备注：因为实用性不高，这个选项我暂时禁用掉了**  
 这个功能默认不启用；其实一般也不太用得上  
 注意：这个功能有时候运行会卡住不动，暂无解决办法 ...  
 
@@ -95,7 +95,7 @@ BDinfo 会输出三个报告，Full report、 Main Summary、Quick Summary
 ![FH-输出结果](https://github.com/Aniverse/filesss/raw/master/Images/OLD/2018.02.16.bdupload.04.png)
 ![FH-h5ai](https://github.com/Aniverse/filesss/raw/master/Images/OLD/2018.02.16.bdupload.05.png)
 
-在 FeralHosting 盒子上运行的结果  
+在 FH 盒子上运行的结果  
 
   -------------------
 ### Some references
