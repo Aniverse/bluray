@@ -71,7 +71,7 @@ heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis);
 CW="${bold}${baihongse} ERROR ${jiacu}";ZY="${baihongse}${bold} ATTENTION ${jiacu}";JG="${baihongse}${bold} WARNING ${jiacu}"
 # --------------------------------------------------------------------------------
 BDDATE=2020.03.01
-BDVER=3.0.1
+BDVER=3.0.2
 DeBUG=0
 # --------------------------------------------------------------------------------
 using_bdinfo=new
@@ -138,7 +138,7 @@ export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 
 # Logo
-function _logo() { clear ; wget --no-check-certificate -t1 -T7 -qO- https://github.com/Aniverse/inexistence/raw/master/03.Files/bluray.logo.1 ; echo -e "${bold}Automated Blu-ray Upload Toolkit ${green}$BDVER${normal}" ; }
+function _logo() { clear ; wget --no-check-certificate -t1 -T7 -qO- https://github.com/Aniverse/inexistence/raw/files/logo/bluray.logo.1 ; echo -e "${bold}Automated Blu-ray Upload Toolkit ${green}$BDVER${normal}" ; }
 
 
 # 必要软件检查
