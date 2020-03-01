@@ -138,7 +138,7 @@ export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 
 # Logo
-function _logo() { clear ; wget --no-check-certificate -t1 -T7 -qO- https://github.com/Aniverse/inexistence/raw/files/logo/bluray.logo.1 ; echo -e "${bold}Automated Blu-ray Upload Toolkit ${green}$BDVER${normal}" ; }
+function _logo() { clear ; wget --no-check-certificate -t1 -T7 -qO- https://github.com/Aniverse/inexistence/raw/files/logo/bluray.logo.1 ; echo -e "${bold}Automated Blu-ray Upload Toolkit ${green}$BDVER ($BDDATE)${normal}" ; }
 
 
 # 必要软件检查
@@ -1038,8 +1038,8 @@ function _end() {
 
 if [[ $do_upgrade == 1 ]] && [[ $EUID == 0 ]]; then
     _logo
-    echo -e "Upgrading script ... "
-    wget -O /usr/local/bin/bluray https://git.io/bluray && chmod +x /usr/local/bin/bluray && echo -e "${green}DONE${normal}"
+    echo -e "Installing latest script ... "
+    wget -qO /usr/local/bin/bluray https://git.io/bluray && chmod +x /usr/local/bin/bluray && echo -e "${green}DONE${normal}\n"
     exit 0
 fi
 
