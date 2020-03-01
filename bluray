@@ -71,7 +71,7 @@ heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis);
 CW="${bold}${baihongse} ERROR ${jiacu}";ZY="${baihongse}${bold} ATTENTION ${jiacu}";JG="${baihongse}${bold} WARNING ${jiacu}"
 # --------------------------------------------------------------------------------
 BDDATE=2020.03.01
-BDVER=3.0.2
+BDVER=3.0.3
 DeBUG=0
 # --------------------------------------------------------------------------------
 using_bdinfo=new
@@ -155,8 +155,8 @@ fi ; }
 
 # 检查必要软件是否齐全
 function _check_install_2(){
-# vcs
-for apps in ffmpeg mono mktorrent convert montage identify bash getopt cut nconvert bc expr ; do
+# vcs montage identify
+for apps in ffmpeg mono mktorrent convert bash getopt cut nconvert bc expr ; do
     app_name=$apps ; _check_install
 done
 rm -rf tmpmissingapp
@@ -287,7 +287,7 @@ while [[ $appmissing == Yes ]]; do
                          if [[ $NoRoot == 1 ]]; then
                              installresponce=0 && echo -e "${baihongse}${bold}ERROR${normal}${bold} You DONOT have ROOT privilege${normal}\n"
                          else
-                             apt-get install -y mono-complete mktorrent imagemagick bc
+                             apt-get install -y mono-complete mktorrent bc # imagemagick
                              [[ ! $( command -v ffmpeg   ) ]] && _install_ffmpeg
                              # [[ ! $( command -v vcs      ) ]] && _install_vcs
                              [[ ! $( command -v nconvert ) ]] && _install_nconvert
