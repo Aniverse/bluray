@@ -66,11 +66,12 @@ baiqingse=${white}${on_cyan}; baihongse=${white}${on_red}; baizise=${white}${on_
 heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis); guangbiao=$(tput cnorm)
 CW="${bold}${baihongse} ERROR ${jiacu}";ZY="${baihongse}${bold} ATTENTION ${jiacu}";JG="${baihongse}${bold} WARNING ${jiacu}"
 # --------------------------------------------------------------------------------
-BDDATE=2019.04.15
-BDVER=2.9.7
+BDDATE=2020.03.01
+BDVER=2.9.8
 DeBUG=0
 # --------------------------------------------------------------------------------
 using_bdinfo=new
+sstn=No
 bdinfocli_path="/etc/inexistence/02.Tools/bdinfocli.exe"
 [[ $using_bdinfo == new ]] && bdinfocli_path="/etc/inexistence/02.Tools/BDinfoCli.0.7.3/BDInfo.exe"
 convert=1
@@ -149,7 +150,8 @@ fi ; }
 
 # 检查必要软件是否齐全
 function _check_install_2(){
-for apps in ffmpeg vcs mono mktorrent convert montage identify bash getopt cut nconvert bc expr ; do
+# vcs
+for apps in ffmpeg mono mktorrent convert montage identify bash getopt cut nconvert bc expr ; do
     app_name=$apps ; _check_install
 done
 rm -rf tmpmissingapp
@@ -282,7 +284,7 @@ while [[ $appmissing == Yes ]]; do
                          else
                              apt-get install -y mono-complete mktorrent imagemagick bc
                              [[ ! $( command -v ffmpeg   ) ]] && _install_ffmpeg
-                             [[ ! $( command -v vcs      ) ]] && _install_vcs
+                             # [[ ! $( command -v vcs      ) ]] && _install_vcs
                              [[ ! $( command -v nconvert ) ]] && _install_nconvert
                              _install_bdinfo ; installdone=1 ; appmissing=No ; _check_install_2
                          fi ;;
@@ -843,7 +845,7 @@ echo -e "${normal}${bold}${baihongse}                DEBUG INFO END             
 # 获取BD info
 function _getinfo() {
 
-[[ $using_bdinfo == old ]] && [[ $bdscan == auto ]] && echo -ne '1\n' | mono "${bdinfocli_path}" "${bdpath}" "${outputpath}"
+[[ $using_bdinfo == old ]] && [[ $bdscan == auto ]] && echo -ne '1\n'    | mono "${bdinfocli_path}" "${bdpath}" "${outputpath}"
 [[ $using_bdinfo == new ]] && [[ $bdscan == auto ]] && echo -ne '1\nq\n' | mono "${bdinfocli_path}" "${bdpath}" "${outputpath}"
 [[ $bdscan == manual ]] && mono "${bdinfocli_path}" "${bdpath}" "${outputpath}"
 
@@ -851,16 +853,16 @@ if [[ ! $bdscan == no ]]; then
 
   # BDinfoCLI 0.7.3 也能输出 Quick Summary
   # [[ $using_bdinfo == old ]] && {
-    sed -n '/QUICK SUMMARY/,//p' "${outputpath}/BDINFO.${file_title}.txt" > temptext
-    count=`wc -l temptext | awk '{print $1-1}' `
-    head -n $count temptext > "${outputpath}/bdinfo.quick.txt"
-    rm temptext
+    sed -n '/QUICK SUMMARY/,//p' "${outputpath}/BDINFO.${file_title}.txt" > $HOME/temptext
+    count=`wc -l $HOME/temptext | awk '{print $1-1}' `
+    head -n $count $HOME/temptext > "${outputpath}/bdinfo.quick.txt"
+    rm $HOME/temptext
   # }
 
-    sed -n '/DISC INFO/,/FILES/p' "${outputpath}/BDINFO.${file_title}.txt" > temptext
-    count=`wc -l temptext | awk '{print $1-2}' `
-    head -n $count temptext > "${outputpath}/bdinfo.main.txt"
-    rm temptext
+    sed -n '/DISC INFO/,/FILES/p' "${outputpath}/BDINFO.${file_title}.txt" > $HOME/temptext
+    count=`wc -l $HOME/temptext | awk '{print $1-2}' `
+    head -n $count $HOME/temptext > "${outputpath}/bdinfo.main.txt"
+    rm $HOME/temptext
 
     mv "${outputpath}/BDINFO.${file_title}.txt" "${outputpath}/bdinfo.full.txt"
     echo -e "\n\n${bold}${green}Scanning BDinfo DONE${normal}\n\n"
@@ -1023,7 +1025,7 @@ _askpath
 _stuff_work
 _askscan
 _askresolution
-_askthumbnail
+#_askthumbnail
 _askmktorrent
 [[ $USELESS == 1 ]] && _askuselessfiles
 [[ $RCLONE == 1 ]] && _askrclone
