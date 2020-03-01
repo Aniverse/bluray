@@ -52,8 +52,12 @@ RCLONEPATH="Replace:/here/with/your/remote/path"
 #
 #
 #
-# bash <(curl -s https://raw.githubusercontent.com/Aniverse/bluray/master/bluray)
-# wget -qO /usr/local/bin/bluray https://github.com/Aniverse/bluray/raw/master/bluray && chmod +x /usr/local/bin/bluray
+#
+usage() {
+bash <(wget -qO- https://git.io/bluray) -u
+bash <(curl -s https://raw.githubusercontent.com/Aniverse/bluray/master/bluray)
+wget -qO /usr/local/bin/bluray https://git.io/bluray && chmod +x /usr/local/bin/bluray
+}
 # --------------------------------------------------------------------------------
 black=$(tput setaf 0); red=$(tput setaf 1); green=$(tput setaf 2); yellow=$(tput setaf 3);
 blue=$(tput setaf 4); magenta=$(tput setaf 5); cyan=$(tput setaf 6); white=$(tput setaf 7);
@@ -67,7 +71,7 @@ heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis);
 CW="${bold}${baihongse} ERROR ${jiacu}";ZY="${baihongse}${bold} ATTENTION ${jiacu}";JG="${baihongse}${bold} WARNING ${jiacu}"
 # --------------------------------------------------------------------------------
 BDDATE=2020.03.01
-BDVER=2.9.9
+BDVER=3.0.0
 DeBUG=0
 # --------------------------------------------------------------------------------
 using_bdinfo=new
@@ -81,7 +85,7 @@ function even_number () { [ ! $(($2%2)) == 0 ] && eval $1=$( expr $2 + 1 ) ; }
 
 # 获取参数
 
-OPTS=$(getopt -n "$0" -o bdyp:i:s:t: --long "debug,default,yes,no-convert,path:,bdinfo:,screenshot:,tracker:" -- "$@")
+OPTS=$(getopt -n "$0" -o bdyp:i:s:t:u --long "debug,default,yes,no-convert,path:,bdinfo:,screenshot:,tracker:,upgrade" -- "$@")
 
 eval set -- "$OPTS"
 
@@ -96,6 +100,7 @@ while true; do
     -y | --yes         ) ForceYes=1        ; shift ;;
          --no-vcs      ) sstn=No           ; shift ;;
          --no-convert  ) convert=0         ; shift ;;
+    -u | --upgrade     ) do_upgrade=1      ; shift ;;
      * ) break ;;
   esac
 done
@@ -1030,6 +1035,14 @@ function _end() {
 
 
 # 结构
+
+if [[ $do_upgrade == 1 ]] && [[ $EUID == 0 ]]; then
+    _logo
+    echo -e "Upgrading script ... "
+    wget -O /usr/local/bin/bluray https://git.io/bluray && chmod +x /usr/local/bin/bluray && echo -e "${green}DONE${normal}"
+    exit 0
+fi
+
 _intro
 _askpath
 _stuff_work
