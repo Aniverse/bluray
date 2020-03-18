@@ -70,8 +70,8 @@ baiqingse=${white}${on_cyan}; baihongse=${white}${on_red}; baizise=${white}${on_
 heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis); guangbiao=$(tput cnorm)
 CW="${bold}${baihongse} ERROR ${jiacu}";ZY="${baihongse}${bold} ATTENTION ${jiacu}";JG="${baihongse}${bold} WARNING ${jiacu}"
 # --------------------------------------------------------------------------------
-BDDATE=2020.03.01
-BDVER=3.0.3
+BDDATE=2020.03.18
+BDVER=3.0.4
 DeBUG=0
 # --------------------------------------------------------------------------------
 using_bdinfo=new
@@ -166,12 +166,13 @@ rm -rf tmpmissingapp
 
 # 有 root 权限的盒子安装 ffmpeg
 function _install_ffmpeg(){
-cd ; wget --no-check-certificate -qO ffmpeg-4.0.2-64bit-static.tar.xz https://github.com/Aniverse/BitTorrentClientCollection/raw/master/Other%20Tools/ffmpeg-4.0.2-64bit-static.tar.xz
-tar xf ffmpeg-4.0.2-64bit-static.tar.xz
-rm -rf ffmpeg-*bit-static/{manpages,presets,model,readme.txt,GPLv3.txt}
-cp -f ffmpeg-*-64bit-static/* /usr/bin
-chmod 755 /usr/bin/{ffmpeg,ffprobe,ffmpeg-10bit,qt-faststart}
-rm -rf ffmpeg-*-64bit-static* ; }
+    mkdir -p /log/inexistence/ffmpeg && cd /log/inexistence/ffmpeg && rm -rf *
+    wget -t2 -T5 -nv -N https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
+    tar xf ffmpeg-release-amd64-static.tar.xz
+    cd ffmpeg*
+    cp -f {ffmpeg,ffprobe,qt-faststart} /usr/bin
+    cd && rm -rf /log/inexistence/ffmpeg
+}
 
 function _install_ffmpeg_2(){
 if [[ `cat /etc/os-release | grep "(" | cut -d '(' -f2 | cut -d ')' -f1 | head -n1 | awk '{print $1}' | tr '[A-Z]' '[a-z]'` == jessie ]]; then
