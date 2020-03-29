@@ -70,14 +70,14 @@ baiqingse=${white}${on_cyan}; baihongse=${white}${on_red}; baizise=${white}${on_
 heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis); guangbiao=$(tput cnorm)
 CW="${bold}${baihongse} ERROR ${jiacu}";ZY="${baihongse}${bold} ATTENTION ${jiacu}";JG="${baihongse}${bold} WARNING ${jiacu}"
 # --------------------------------------------------------------------------------
-BDDATE=2020.03.18
-BDVER=3.0.4
+BDDATE=2020.03.29
+BDVER=3.0.5
 DeBUG=0
 # --------------------------------------------------------------------------------
 using_bdinfo=new
 sstn=No
-bdinfocli_path="/etc/inexistence/02.Tools/bdinfocli.exe"
-[[ $using_bdinfo == new ]] && bdinfocli_path="/etc/inexistence/02.Tools/BDinfoCli.0.7.3/BDInfo.exe"
+bdinfocli_path="/etc/abox/app/bdinfocli.exe"
+[[ $using_bdinfo == new ]] && bdinfocli_path="/etc/abox/app/BDinfoCli.0.7.3/BDInfo.exe"
 convert=1
 # -------------------------------------------------------------------------------- Transform numbers
 function even_number () { [ ! $(($2%2)) == 0 ] && eval $1=$( expr $2 + 1 ) ; }
@@ -197,15 +197,14 @@ rm -rf NConvert* ; } ; }
 
 # 有 root 权限的盒子安装 bdinfo
 function _install_bdinfo() {
-if [[ ! -f /etc/inexistence/02.Tools/BDinfoCli.0.7.3/BDInfo.exe ]]; then
-    mkdir -p /etc/inexistence/02.Tools
-    cd /etc/inexistence/02.Tools
+if [[ ! -f /etc/abox/app/BDinfoCli.0.7.3/BDInfo.exe ]]; then
+    mkdir -p /etc/abox/app
+    cd /etc/abox/app
     svn co https://github.com/Aniverse/bluray/trunk/tools/BDinfoCli.0.7.3
     mv -f BDinfoCli.0.7.3 BDinfoCli
-  # wget -q https://github.com/Aniverse/BitTorrentClientCollection/raw/master/BDTools/BDinfoCli.0.7.5.tar.gz && tar zxf BDinfoCli.0.7.5.tar.gz && rm -f BDinfoCli.0.7.5.tar.gz
 fi
-if [[ ! -f /etc/inexistence/02.Tools/bdinfocli.exe ]]; then
-    wget https://github.com/Aniverse/bluray/raw/master/tools/bdinfocli.exe -qO /etc/inexistence/02.Tools/bdinfocli.exe
+if [[ ! -f /etc/abox/app/bdinfocli.exe ]]; then
+    wget https://github.com/Aniverse/bluray/raw/master/tools/bdinfocli.exe -qO /etc/abox/app/bdinfocli.exe
 fi ; }
 
 
@@ -379,7 +378,7 @@ UHDBD=0              ; [[ ` echo "${BDname}" | grep -E "[He][Ee][Vv][Cc]" ` ]] &
 [[ ! $UHDBD == 1 ]] && [[ ` echo "${BDname}" | grep -E "\b[Uu][Hh][Dd]\b" ` ]] && UHDBD=1
 
 # [[ $UHDBD == 1 ]] && [[   $USE_Built_IN == 1 ]] && using_bdinfo=new && bdinfocli_path="$DIR"/tools/BDinfoCli.0.7.3/BDInfo.exe
-# [[ $UHDBD == 1 ]] && [[ ! $USE_Built_IN == 1 ]] && using_bdinfo=new && bdinfocli_path="/etc/inexistence/02.Tools/BDinfoCli.0.7.3/BDInfo.exe"
+# [[ $UHDBD == 1 ]] && [[ ! $USE_Built_IN == 1 ]] && using_bdinfo=new && bdinfocli_path="/etc/abox/app/BDinfoCli.0.7.3/BDInfo.exe"
 
 # if [[ ! $UHDBD == 1 ]] && [[ -d "${pathtostuff}" ]]; then
 if [[ -d "${pathtostuff}" ]]; then
@@ -482,8 +481,8 @@ file_title_clean="$(  echo "$file_title_clean" | tr -d ')'  )"
 file_title_clean="`   echo "$file_title_clean" | sed 's/\//\./'   `"
 
 if [[ "${stufftype}" == "BDISO" ]]; then
-    mkdir -p "/etc/inexistence/06.BluRay/$file_title_clean"
-    bdpath="/etc/inexistence/06.BluRay/$file_title_clean"
+    mkdir -p "/mnt/bluray/$file_title_clean"
+    bdpath="/mnt/bluray/$file_title_clean"
     mount -o loop "$bdisopath" "$bdpath" >> /dev/null 2>&1
 fi
 
@@ -755,7 +754,7 @@ esac
 
 if [[ $movefile == Yes ]]; then
     echo -e "${bold}The script will create a new torrent without unnecessary files${normal}"
-    new_bdpath="/etc/inexistence/06.BluRay/temp/$file_title_clean"
+    new_bdpath="/bluray/tmp/$file_title_clean"
     mkdir -p "$new_bdpath"
     if [[ "${stufftype}" == "BDISO" ]]; then
         copy_bdiso_to_bdmv=1
@@ -941,22 +940,29 @@ echo -e "\n\n${bold}${green}Taking screenshots DONE${normal}\n\n" ; }
 
 
 # 缩略图
-function _takethumbnail() { vcs "${main_m2ts_path}" -U0 -n 24 -c 4 -H200 -a 16/9 -o "${outputpath}/thumbs.png" && echo -e "\n\n${bold}${green}Generating thumbnails DONE${normal}\n\n" ; }
+function _takethumbnail() {
+    vcs "${main_m2ts_path}" -U0 -n 24 -c 4 -H200 -a 16/9 -o "${outputpath}/thumbs.png" && 
+    echo -e "\n\n${bold}${green}Generating thumbnails DONE${normal}\n\n"
+}
 
 # 制作种子
 function _mktorrent() {
-if [[ $copy_bdiso_to_bdmv == 1 ]]; then
-    mkdir -p "/etc/inexistence/06.BluRay/temp/$file_title_clean"
-    echo -ne "Copying files from mounted BDISO ... "
-    cp -rf "$bdpath/BDMV" "/etc/inexistence/06.BluRay/temp/$file_title_clean"/BDMV
-    cp -rf "$bdpath/CERTIFICATE" "/etc/inexistence/06.BluRay/temp/$file_title_clean"/CERTIFICATE
-    echo -e "${green}DONE${normal}"
-    bdpath="/etc/inexistence/06.BluRay/temp/$file_title_clean"
-fi
-mktorrent -v -p -l 24 $ANNOUNCE -o "${outputpath}/new.torrent" "$bdpath" && echo -e "\n\n${bold}${green}Creating torrents DONE${normal}\n\n" ; }
+    if [[ $copy_bdiso_to_bdmv == 1 ]]; then
+        mkdir -p "/bluray/extract/$file_title_clean"
+        echo -ne "Copying files from mounted BDISO ... "
+        cp -rf "$bdpath/BDMV"         "/bluray/extract/$file_title_clean"/BDMV
+        cp -rf "$bdpath/CERTIFICATE"  "/bluray/extract/$file_title_clean"/CERTIFICATE
+        echo -e "${green}DONE${normal}"
+        bdpath="/etc/inexistence/06.BluRay/temp/$file_title_clean"
+    fi
+    mktorrent -v -p -l 24 $ANNOUNCE -o "${outputpath}/new.torrent" "$bdpath" && echo -e "\n\n${bold}${green}Creating torrents DONE${normal}\n\n"
+}
 
 # rclone 上传
-function _rcloneup() { rclone copy -v --stats 5s "${outputpath}" "${RCLONEPATH}" && echo -e "\n\n${bold}${green}rclone transfer DONE${normal}\n\n" ; }
+function _rcloneup() {
+    rclone copy -v --stats 5s "${outputpath}" "${RCLONEPATH}" &&
+    echo -e "\n\n${bold}${green}rclone transfer DONE${normal}\n\n"
+}
 
 
 
