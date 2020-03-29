@@ -34,8 +34,8 @@ NoInstall=0
 # won't be actually usable unless you have changed the following DOWNLOAD_LINK_BASE and WEB_FOLDER
 # 
 BATCH=0
-[[ $BATCH == 1 ]] && DOWNLOAD_LINK_BASE="https://$( wget --no-check-certificate -t1 -T6 -qO- v4.ipv6-test.com/api/myip.php )/h5ai/inexistence/04.Upload"
-WEB_FOLDER="/etc/inexistence/04.Upload"
+WEB_FOLDER="/log/bluray"
+[[ $BATCH == 1 ]] && DOWNLOAD_LINK_BASE="https://$( wget --no-check-certificate -t1 -T6 -qO- v4.ipv6-test.com/api/myip.php )/h5ai/log/bluray"
 # --------------------------------------------------------------------------------
 #
 # 如果你要用 rclone 自动上传文件，请把 RCLONE 改成 1，然后 RCLONEPATH 改成你 rclone remote 的路径（请确保 rclone 已配置好且在 $PATH 内）
@@ -47,7 +47,6 @@ RCLONEPATH="Replace:/here/with/your/remote/path"
 # DO NOT CHANGE THE FOLLOWING LINES
 #
 # 下面的内容无需修改
-#
 #
 #
 #
@@ -71,14 +70,14 @@ heibaise=${black}${on_white}; shanshuo=$(tput blink); wuguangbiao=$(tput civis);
 CW="${bold}${baihongse} ERROR ${jiacu}";ZY="${baihongse}${bold} ATTENTION ${jiacu}";JG="${baihongse}${bold} WARNING ${jiacu}"
 # --------------------------------------------------------------------------------
 BDDATE=2020.03.29
-BDVER=3.0.6
+BDVER=3.0.7
 DeBUG=0
 # --------------------------------------------------------------------------------
 using_bdinfo=new
 sstn=No
+convert=1
 bdinfocli_path="/etc/abox/app/bdinfocli.exe"
 [[ $using_bdinfo == new ]] && bdinfocli_path="/etc/abox/app/BDinfoCli.0.7.3/BDInfo.exe"
-convert=1
 # -------------------------------------------------------------------------------- Transform numbers
 function even_number () { [ ! $(($2%2)) == 0 ] && eval $1=$( expr $2 + 1 ) ; }
 # --------------------------------------------------------------------------------
@@ -482,8 +481,8 @@ function _stuff_work() {
     file_title_clean="`   echo "$file_title_clean" | sed 's/\//\./'   `"
 
     if [[ "${stufftype}" == "BDISO" ]]; then
-        mkdir -p "/mnt/bluray/$file_title_clean"
-        bdpath="/mnt/bluray/$file_title_clean"
+        mkdir -p "/bluray/mount/$file_title_clean"
+        bdpath="/bluray/mount/$file_title_clean"
         mount -o loop "$bdisopath" "$bdpath" >> /dev/null 2>&1
     fi
 
@@ -492,15 +491,15 @@ function _stuff_work() {
     duration2=`  date -u -d "1970-01-01 $duration1" +%s  `
     VideoResolution=` ffmpeg -i "$main_m2ts_path" 2>&1 | grep -E "Stream.*Video" | grep -Eo "[0-9]{2,5}x[0-9]{2,5}" | head -n1 `
 
-    if [[ $CustomedOutput == 1 ]] && [[ $OUTPUT ]]; then
+    if   [[ $CustomedOutput == 1 ]] && [[ -d $OUTPUT   ]]; then
         mkdir -p "$OUTPUT/$file_title_clean"
         outputpath="$OUTPUT/$file_title_clean"
     elif [[ $CustomedOutput == 0 ]] && [[ $NoRoot == 1 ]]; then
         mkdir -p "$DIR/0utput/$file_title_clean"
         outputpath="$DIR/0utput/$file_title_clean"
     elif [[ $CustomedOutput == 0 ]] && [[ $NoRoot == 0 ]]; then
-        mkdir -p "/etc/inexistence/04.Upload/$file_title_clean"
-        outputpath="/etc/inexistence/04.Upload/$file_title_clean"
+        mkdir -p   "/log/bluray/$file_title_clean"
+        outputpath="/log/bluray/$file_title_clean"
     fi
 
     if [[ $DeBUG == 1 ]]; then
@@ -954,7 +953,7 @@ function _mktorrent() {
         cp -rf "$bdpath/BDMV"         "/bluray/extract/$file_title_clean"/BDMV
         cp -rf "$bdpath/CERTIFICATE"  "/bluray/extract/$file_title_clean"/CERTIFICATE
         echo -e "${green}DONE${normal}"
-        bdpath="/etc/inexistence/06.BluRay/temp/$file_title_clean"
+        bdpath="/bluray/extract/$file_title_clean"
     fi
     mktorrent -v -p -l 24 $ANNOUNCE -o "${outputpath}/new.torrent" "$bdpath" && echo -e "\n\n${bold}${green}Creating torrents DONE${normal}\n\n"
 }
@@ -980,7 +979,7 @@ function _end() {
     fi
 
     # 不要解除挂载，解除挂载了等会儿怎么 seeding？
-    # [[ $stufftype == "BDISO" ]] && umount "$bdisopath" # && rm -rf "/etc/inexistence/06.BluRay/$file_title_clean" "/etc/inexistence/06.BluRay/temp/$file_title_clean"
+    # [[ $stufftype == "BDISO" ]] && umount "$bdisopath" # && rm -rf "/bluray/mount/$file_title_clean" "/bluray/mount/$file_title_clean"
 
     file_title_short=` echo "${file_title_clean}" | cut -c1-40  `
     [[ $BATCH == 1 ]] && { rar a -m5 "${WEB_FOLDER}/${file_title_short}.rar" "$outputpath" ; }
